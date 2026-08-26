@@ -2,297 +2,383 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>No Internet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YouTube</title>
+    <!-- AI Face Sentry (TensorFlow & BlazeFace) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7"></script>
     <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
-        body { background: #f7f7f7; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+        body { background: #0f0f0f; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
 
-        /* Game Camouflage */
-        #game-screen { text-align: center; width: 100%; max-width: 400px; padding: 20px; user-select: none; }
-        #game-screen h2 { font-size: 22px; color: #555; margin-bottom: 5px; }
-        #game-screen p { font-size: 13px; color: #888; margin-bottom: 15px; }
-        canvas { background: #fff; border: 1px solid #ccc; border-radius: 6px; display: block; margin: 0 auto; }
-        .jump-btn { margin-top: 15px; padding: 10px 25px; font-weight: bold; background: #555; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        /* --- 1. YouTube Disguise Front Page --- */
+        #search-screen { width: 100%; max-width: 580px; padding: 40px 16px; display: flex; flex-direction: column; align-items: center; }
+        .yt-logo-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 30px; }
+        .yt-icon-box { background: #ff0000; width: 34px; height: 24px; border-radius: 6px; display: flex; justify-content: center; align-items: center; }
+        .yt-play-arrow { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 9px solid #fff; }
+        .yt-text { font-weight: bold; font-size: 20px; letter-spacing: -0.5px; }
 
-        /* Hidden Auth UI */
-        .box { display: none; background: #1a1a1a; padding: 25px; border-radius: 8px; width: 330px; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .box h2 { margin-bottom: 12px; font-size: 18px; text-align: center; }
-        input { width: 100%; padding: 10px; margin: 8px 0; background: #2b2b2b; border: 1px solid #444; color: #fff; border-radius: 5px; outline: none; }
-        button { width: 100%; padding: 10px; background: #007bff; border: none; color: #fff; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 4px; }
-        button:hover { background: #0056b3; }
+        .search-container { display: flex; width: 100%; border: 1px solid #303030; border-radius: 24px; overflow: hidden; background: #121212; }
+        .search-container:focus-within { border-color: #1c62b9; }
+        .yt-input { flex: 1; padding: 11px 16px; background: transparent; border: none; color: #fff; font-size: 15px; outline: none; }
+        .yt-btn { background: #222; border: none; border-left: 1px solid #303030; padding: 0 18px; color: #aaa; cursor: pointer; font-size: 14px; }
+        
+        .video-grid-preview { width: 100%; margin-top: 30px; display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .yt-card { background: #181818; border-radius: 8px; overflow: hidden; }
+        .yt-thumb { width: 100%; height: 160px; background: #242424; display: flex; justify-content: center; align-items: center; color: #666; font-size: 32px; }
+        .yt-info { padding: 12px; font-size: 13px; color: #aaa; }
 
-        /* Chat Layout */
-        #chat-section { display: none; width: 95%; max-width: 440px; height: 85vh; flex-direction: column; background: #1a1a1a; border-radius: 8px; overflow: hidden; color: #fff; }
-        .chat-header { padding: 10px 12px; background: #242424; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; gap: 5px; }
-        .header-actions { display: flex; gap: 6px; }
-        .btn-sm { padding: 6px 10px; font-size: 11px; border: none; border-radius: 4px; cursor: pointer; color: #fff; font-weight: bold; }
-        .btn-history { background: #17a2b8; }
-        .btn-clear { background: #e0a800; color: #000; }
-        .btn-panic { background: #dc3545; }
+        /* --- 2. Identity Verification Box --- */
+        .box { display: none; background: #1f2c34; padding: 25px; border-radius: 10px; width: 90%; max-width: 330px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); margin-top: 15vh; }
+        .box h2 { font-size: 16px; text-align: center; margin-bottom: 15px; color: #00a884; }
+        input.auth-input { width: 100%; padding: 12px; margin: 8px 0; background: #2a3942; border: 1px solid #33444d; color: #fff; border-radius: 6px; outline: none; font-size: 14px; }
+        button.auth-btn { width: 100%; padding: 12px; background: #00a884; border: none; color: #fff; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 6px; font-size: 14px; }
 
-        #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .msg { padding: 8px 12px; border-radius: 6px; max-width: 78%; font-size: 13px; line-height: 1.4; word-break: break-word; }
-        .me { background: #007bff; align-self: flex-end; }
-        .other { background: #333; align-self: flex-start; }
-        .system { align-self: center; font-size: 10px; color: #777; }
+        /* --- 3. WhatsApp Pro Chat Section --- */
+        #chat-section { display: none; width: 100%; max-width: 500px; height: 100vh; flex-direction: column; background: #0b141a; }
+        .chat-header { height: 60px; background: #202c33; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; border-bottom: 1px solid #2a3942; }
+        .user-title { font-size: 15px; font-weight: 600; color: #e9edef; }
+        .typing-sub { font-size: 11px; color: #25d366; height: 14px; }
+        
+        /* Disguised Vault Button Icons (No Suspicion) */
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+        .icon-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: #aebac1; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .icon-btn:hover { background: #2a3942; }
+        .btn-panic { background: #d32f2f; color: #fff; border: none; padding: 6px 12px; font-size: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
-        .chat-input { display: flex; padding: 10px; background: #141414; gap: 6px; }
-        .chat-input input { margin: 0; }
-        .chat-input button { width: 65px; margin: 0; }
+        #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background: #0b141a; background-image: radial-gradient(#1f2c34 1px, transparent 1px); background-size: 16px 16px; }
+        
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 82%; position: relative; }
+        .msg-wrapper.me { align-self: flex-end; }
+        .msg-wrapper.other { align-self: flex-start; }
+
+        .msg-bubble { padding: 7px 10px; border-radius: 8px; font-size: 14px; line-height: 1.35; color: #e9edef; word-break: break-word; }
+        .me .msg-bubble { background: #005c4b; border-top-right-radius: 2px; }
+        .other .msg-bubble { background: #202c33; border-top-left-radius: 2px; }
+
+        .reply-quote { background: rgba(0,0,0,0.3); border-left: 3px solid #25d366; padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 5px; color: #8696a0; }
+        .media-preview { width: 100%; max-width: 250px; max-height: 250px; border-radius: 6px; margin-top: 4px; object-fit: cover; cursor: pointer; }
+        
+        .meta-info { font-size: 10px; color: #8696a0; display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 3px; }
+        .tick { font-size: 12px; font-weight: bold; color: #8696a0; }
+        .tick.seen { color: #53bdeb; }
+
+        /* Swipe-to-Reply Banner */
+        #reply-bar { display: none; background: #1f2c34; padding: 8px 12px; border-left: 4px solid #00a884; justify-content: space-between; align-items: center; }
+        
+        /* Footer Input Area */
+        .chat-footer { padding: 8px; background: #202c33; display: flex; align-items: center; gap: 6px; }
+        .attach-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #8696a0; }
+        .input-bar { flex: 1; background: #2a3942; border-radius: 20px; padding: 9px 14px; color: #fff; border: none; outline: none; font-size: 14px; }
+        .send-btn { background: #00a884; border: none; width: 38px; height: 38px; border-radius: 50%; color: #fff; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; }
+
+        /* Full Screen Viewer for Photo/Video */
+        #media-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 200; justify-content: center; align-items: center; }
+        #media-modal img, #media-modal video { max-width: 95%; max-height: 90vh; border-radius: 8px; }
+
+        /* Message Edit/Delete Menu */
+        #msg-menu { display: none; position: absolute; background: #233138; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.6); z-index: 150; }
+        #msg-menu button { display: block; width: 100%; padding: 8px 14px; background: none; border: none; color: #e9edef; font-size: 12px; text-align: left; cursor: pointer; }
+        #msg-menu button:hover { background: #182229; }
     </style>
 </head>
 <body>
 
-    <!-- Game Screen -->
-    <div id="game-screen">
-        <h2>No Internet</h2>
-        <p>Try checking your connection or network cables.</p>
-        <canvas id="gameCanvas" width="340" height="150"></canvas>
-        <button class="jump-btn" onclick="jump()">TAP TO JUMP</button>
+    <!-- Sentry Camera Feed (Completely Hidden) -->
+    <video id="guard-cam" autoplay playsinline muted style="display:none;"></video>
+    <input type="file" id="media-uploader" accept="image/*,video/*" style="display:none;" onchange="handleFileUpload(event)">
+    
+    <!-- Full-Screen Modal Preview -->
+    <div id="media-modal" onclick="closeMediaModal()"></div>
+
+    <!-- Long Press Menu -->
+    <div id="msg-menu">
+        <button onclick="editSelectedMsg()">✏️ Edit</button>
+        <button onclick="deleteSelectedMsg()" style="color:#ff5252;">🗑️ Delete</button>
     </div>
 
-    <!-- Hidden Login Form -->
+    <!-- 1. YouTube Search Bar Disguise -->
+    <div id="search-screen">
+        <div class="yt-logo-wrap">
+            <div class="yt-icon-box"><div class="yt-play-arrow"></div></div>
+            <span class="yt-text">YouTube</span>
+        </div>
+        <div class="search-container">
+            <input type="text" id="fake-search" class="yt-input" placeholder="Search" onkeypress="if(event.key==='Enter') executeSearch()">
+            <button class="yt-btn" onclick="executeSearch()">🔍</button>
+        </div>
+        <div class="video-grid-preview">
+            <div class="yt-card">
+                <div class="yt-thumb">▶</div>
+                <div class="yt-info">Trending News & Live Updates</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Hidden Login Screen -->
     <div class="box" id="login-section">
         <h2>Identity Check</h2>
-        <input type="text" id="username" placeholder="Username" autocomplete="off">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Authenticate</button>
+        <input type="text" id="username" class="auth-input" placeholder="Username" autocomplete="off">
+        <input type="password" id="password" class="auth-input" placeholder="Password">
+        <button class="auth-btn" onclick="login()">Enter</button>
         <p id="err" style="color: #ff5252; font-size: 11px; margin-top: 8px; text-align: center;"></p>
     </div>
 
-    <!-- 4-Digit History PIN Prompt -->
+    <!-- 3. Disguised Settings Vault (PIN Prompt) -->
     <div class="box" id="pin-modal" style="position: absolute; z-index: 100;">
-        <h2>Enter 4-Digit History PIN</h2>
-        <input type="password" id="history-pin" maxlength="4" placeholder="••••" style="letter-spacing: 5px; text-align: center;">
-        <button onclick="unlockHistory()">Unlock History</button>
-        <button onclick="closePinModal()" style="background: #444; margin-top: 6px;">Cancel</button>
+        <h2>System Settings Verification</h2>
+        <p style="font-size: 11px; color: #8696a0; text-align: center; margin-bottom: 8px;">Enter security PIN to restore cached session:</p>
+        <input type="password" id="history-pin" class="auth-input" maxlength="4" placeholder="••••" style="letter-spacing: 6px; text-align: center;">
+        <button class="auth-btn" onclick="unlockHistory()">Restore Vault</button>
+        <button class="auth-btn" onclick="closePinModal()" style="background: #33444d; margin-top: 6px;">Cancel</button>
         <p id="pin-err" style="color: #ff5252; font-size: 11px; margin-top: 8px; text-align: center;"></p>
     </div>
 
-    <!-- Chat Screen -->
+    <!-- 4. WhatsApp Chat Room -->
     <div id="chat-section">
         <div class="chat-header">
-            <span id="user-display" style="font-size: 12px; font-weight: bold;"></span>
+            <div>
+                <div class="user-title" id="user-display">Encrypted Chat</div>
+                <div class="typing-sub" id="typing-status"></div>
+            </div>
             <div class="header-actions">
-                <button class="btn-sm btn-history" onclick="showPinPrompt()">History</button>
-                <button class="btn-sm btn-clear" onclick="clearAllChat()">Clear</button>
-                <button class="btn-sm btn-panic" onclick="exitSafety()">Exit</button>
+                <!-- Disguised Vault Access (Looks like Settings ⚙️ / Refresh 🔄) -->
+                <button class="icon-btn" title="Sync Settings" onclick="showPinPrompt()">⚙️</button>
+                <button class="icon-btn" title="Clear Cache" onclick="clearAllChat()">🧹</button>
+                <button class="btn-panic" onclick="exitSafety()">Exit</button>
             </div>
         </div>
-        <div id="messages"></div>
-        <div class="chat-input">
-            <input type="text" id="msg-input" placeholder="Type a message..." onkeypress="handleKey(event)">
-            <button onclick="sendMessage()">Send</button>
+
+        <div id="messages" onclick="closeMsgMenu()"></div>
+
+        <!-- Swipe-to-Reply Banner -->
+        <div id="reply-bar">
+            <div>
+                <strong id="reply-to-user" style="font-size:11px; color:#00a884;"></strong>
+                <p id="reply-to-text" style="font-size:12px; color:#fff;"></p>
+            </div>
+            <button onclick="cancelReply()" style="background:none; border:none; color:#8696a0; font-size:18px; cursor:pointer;">✕</button>
+        </div>
+
+        <div class="chat-footer">
+            <button class="attach-btn" onclick="document.getElementById('media-uploader').click()">📎</button>
+            <input type="text" id="msg-input" class="input-bar" placeholder="Type a message..." oninput="handleTyping()" onkeypress="if(event.key==='Enter') sendTextMessage()">
+            <button class="send-btn" onclick="sendTextMessage()">➤</button>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // Reload Security
-        if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
-            window.location.replace("https://www.google.com");
-        }
+        // Secret Trigger Keyword
+        const SECRET_KEY = "safe";
 
-        // Mini Runner Game Engine
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        let dino = { x: 30, y: 110, w: 20, h: 20, dy: 0, jumpPower: -8, gravity: 0.4, grounded: true };
-        let obstacle = { x: 340, y: 115, w: 15, h: 15, speed: 4 };
-        let score = 0;
-        let gameLoop;
-
-        function jump() {
-            if (dino.grounded) {
-                dino.dy = dino.jumpPower;
-                dino.grounded = false;
+        function executeSearch() {
+            const query = document.getElementById('fake-search').value.trim();
+            if (query.toLowerCase() === SECRET_KEY) {
+                document.getElementById('search-screen').style.display = 'none';
+                document.getElementById('login-section').style.display = 'block';
+            } else {
+                window.location.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
             }
         }
 
-        function updateGame() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // --- AI Face Guard ---
+        let aiModel = null;
+        async function initAiGuard() {
+            try {
+                aiModel = await blazeface.load();
+                const video = document.getElementById('guard-cam');
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                video.srcObject = stream;
 
-            // Ground
-            ctx.strokeStyle = "#ccc";
-            ctx.beginPath();
-            ctx.moveTo(0, 130);
-            ctx.lineTo(340, 130);
-            ctx.stroke();
-
-            // Dino
-            dino.dy += dino.gravity;
-            dino.y += dino.dy;
-            if (dino.y >= 110) { dino.y = 110; dino.dy = 0; dino.grounded = true; }
-            ctx.fillStyle = "#555";
-            ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
-
-            // Obstacle
-            obstacle.x -= obstacle.speed;
-            if (obstacle.x < -20) {
-                obstacle.x = 340;
-                score++;
+                setInterval(async () => {
+                    if (document.getElementById('chat-section').style.display === 'flex' && aiModel && video.readyState === 4) {
+                        const predictions = await aiModel.estimateFaces(video, false);
+                        if (predictions.length > 1) {
+                            exitSafety();
+                        }
+                    }
+                }, 400);
+            } catch (err) {
+                console.log("AI Sentry ready.");
             }
-            ctx.fillStyle = "#777";
-            ctx.fillRect(obstacle.x, obstacle.y, obstacle.w, obstacle.h);
-
-            // Score Counter
-            ctx.fillStyle = "#333";
-            ctx.font = "12px Arial";
-            ctx.fillText(`Score: ${score}`, 280, 20);
-
-            // Hit logic
-            if (obstacle.x < dino.x + dino.w && obstacle.x + obstacle.w > dino.x && dino.y + dino.h > obstacle.y) {
-                score = 0;
-                obstacle.x = 340;
-            }
-
-            gameLoop = requestAnimationFrame(updateGame);
         }
-        updateGame();
-
-        // --- HIDDEN TRIGGERS ---
-        function triggerLoginScreen() {
-            cancelAnimationFrame(gameLoop);
-            document.body.style.background = "#121212";
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('login-section').style.display = 'block';
-        }
-
-        // Trigger 1 (Keyboard): 'open' type karte hi unlock
-        let keyHistory = "";
-        document.addEventListener("keydown", (e) => {
-            if (e.code === "Space") {
-                jump();
-                return;
-            }
-            keyHistory += e.key.toLowerCase();
-            if (keyHistory.length > 4) keyHistory = keyHistory.slice(-4);
-            if (keyHistory === "open") {
-                triggerLoginScreen();
-            }
-        });
-
-        // Trigger 2 (Mobile): Canvas ke Top-Right (Score par) 1.5 second Long Press
-        let pressTimer;
-        canvas.addEventListener("touchstart", (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const touchX = e.touches[0].clientX - rect.left;
-            const touchY = e.touches[0].clientY - rect.top;
-
-            if (touchX > 250 && touchY < 40) {
-                pressTimer = setTimeout(() => {
-                    triggerLoginScreen();
-                }, 1500);
-            }
-        });
-
-        canvas.addEventListener("touchend", () => clearTimeout(pressTimer));
-
-        // --- AUTH & CHAT LOGIC ---
-        let socket;
-        let currentUser = '';
 
         function exitSafety() {
-            window.location.replace("https://www.google.com");
+            // Auto Hide chat and open YouTube
+            document.getElementById('messages').innerHTML = '';
+            window.location.replace("https://www.youtube.com");
         }
+
+        let socket, currentUser = '', replyTarget = null, selectedMsgId = null;
 
         async function login() {
             const u = document.getElementById('username').value.trim();
             const p = document.getElementById('password').value.trim();
-
             const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: u, password: p })
             });
             const data = await res.json();
-
             if (data.success) {
                 currentUser = u;
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('chat-section').style.display = 'flex';
                 document.getElementById('user-display').innerText = `@${currentUser}`;
 
-                socket = io();
-                socket.emit('joinRoom', currentUser);
-
-                socket.on('message', (msg) => renderMessage(msg));
-                socket.on('chatCleared', () => {
-                    document.getElementById('messages').innerHTML = '';
-                    renderSystemMessage("--- Chat has been cleared ---");
-                });
-                socket.on('systemMessage', (text) => renderSystemMessage(text));
+                initAiGuard();
+                initSockets();
             } else {
                 document.getElementById('err').innerText = data.message;
             }
         }
 
-        function showPinPrompt() {
-            document.getElementById('pin-modal').style.display = 'block';
-            document.getElementById('history-pin').value = '';
-            document.getElementById('pin-err').innerText = '';
-        }
+        function initSockets() {
+            socket = io();
+            socket.emit('joinRoom', currentUser);
+            socket.emit('markSeen', currentUser);
 
-        function closePinModal() {
-            document.getElementById('pin-modal').style.display = 'none';
-        }
-
-        async function unlockHistory() {
-            const pin = document.getElementById('history-pin').value.trim();
-            const res = await fetch('/api/history', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pin })
+            socket.on('message', (msg) => {
+                renderMessage(msg);
+                if (msg.user !== currentUser) socket.emit('markSeen', currentUser);
             });
-            const data = await res.json();
 
-            if (data.success) {
+            socket.on('typing', (data) => {
+                if (data.user !== currentUser) {
+                    document.getElementById('typing-status').innerText = data.isTyping ? `${data.user} is typing...` : '';
+                }
+            });
+
+            socket.on('seenUpdate', () => {
+                document.querySelectorAll('.tick').forEach(t => {
+                    t.innerText = '✓✓';
+                    t.classList.add('seen');
+                });
+            });
+
+            socket.on('messageEdited', (data) => {
+                const el = document.getElementById(`txt-${data.id}`);
+                if (el) el.innerHTML = `${data.text} <span style="font-size:9px; color:#8696a0;">(edited)</span>`;
+            });
+
+            socket.on('messageDeleted', (data) => {
+                const el = document.getElementById(`msg-${data.id}`);
+                if (el) el.remove();
+            });
+
+            socket.on('chatCleared', () => {
                 document.getElementById('messages').innerHTML = '';
-                data.history.forEach(msg => renderMessage(msg));
-                closePinModal();
-                renderSystemMessage("--- History Loaded ---");
-            } else {
-                document.getElementById('pin-err').innerText = data.message;
-            }
+            });
         }
 
-        function clearAllChat() {
-            if (confirm("Permanently delete chat for both users?")) {
-                socket.emit('clearHistory');
-            }
+        let typingTimeout;
+        function handleTyping() {
+            socket.emit('typing', { user: currentUser, isTyping: true });
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('typing', { user: currentUser, isTyping: false });
+            }, 1200);
         }
 
-        function sendMessage() {
+        function sendTextMessage() {
             const input = document.getElementById('msg-input');
             if (!input.value.trim()) return;
-            socket.emit('chatMessage', { user: currentUser, text: input.value });
+
+            socket.emit('chatMessage', {
+                user: currentUser,
+                text: input.value,
+                replyTo: replyTarget
+            });
             input.value = '';
+            cancelReply();
+            socket.emit('typing', { user: currentUser, isTyping: false });
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            const isVideo = file.type.startsWith('video');
+            reader.onload = function(evt) {
+                socket.emit('chatMessage', {
+                    user: currentUser,
+                    fileType: isVideo ? 'video' : 'image',
+                    fileData: evt.target.result,
+                    replyTo: replyTarget
+                });
+                cancelReply();
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
         }
 
         function renderMessage(msg) {
-            const div = document.createElement('div');
-            div.className = `msg ${msg.user === currentUser ? 'me' : 'other'}`;
-            div.innerHTML = `<strong>${msg.user}:</strong> ${msg.text} <div style="font-size:9px; opacity:0.6; text-align:right; margin-top:2px;">${msg.time}</div>`;
-            document.getElementById('messages').appendChild(div);
-            scrollToBottom();
+            const isMe = msg.user === currentUser;
+            const wrap = document.createElement('div');
+            wrap.className = `msg-wrapper ${isMe ? 'me' : 'other'}`;
+            wrap.id = `msg-${msg.id}`;
+
+            let replyHtml = '';
+            if (msg.replyTo) {
+                replyHtml = `<div class="reply-quote"><strong>${msg.replyTo.user}:</strong> ${msg.replyTo.text || '[Media]'}</div>`;
+            }
+
+            let mediaHtml = '';
+            if (msg.fileType === 'image') {
+                mediaHtml = `<img src="${msg.fileData}" class="media-preview" onclick="openMedia('${msg.fileData}', 'image')">`;
+            } else if (msg.fileType === 'video') {
+                mediaHtml = `<video src="${msg.fileData}" class="media-preview" onclick="openMedia('${msg.fileData}', 'video')" controls></video>`;
+            }
+
+            const tickHtml = isMe ? `<span class="tick ${msg.status === 'seen' ? 'seen' : ''}">${msg.status === 'seen' ? '✓✓' : '✓'}</span>` : '';
+
+            wrap.innerHTML = `
+                <div class="msg-bubble" oncontextmenu="handleMsgOptions(event, '${msg.id}', '${msg.user}')">
+                    ${replyHtml}
+                    <div id="txt-${msg.id}">${msg.text || ''} ${msg.edited ? '<span style="font-size:9px; color:#8696a0;">(edited)</span>' : ''}</div>
+                    ${mediaHtml}
+                    <div class="meta-info">
+                        <span>${msg.time}</span>
+                        ${tickHtml}
+                    </div>
+                </div>
+            `;
+
+            // Mobile Swipe to reply
+            let startX = 0;
+            wrap.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+            wrap.addEventListener('touchend', e => {
+                if (e.changedTouches[0].clientX - startX > 50) {
+                    setReply(msg.user, msg.text || (msg.fileType ? `[${msg.fileType}]` : ''));
+                }
+            });
+
+            document.getElementById('messages').appendChild(wrap);
+            wrap.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function renderSystemMessage(text) {
-            const div = document.createElement('div');
-            div.className = 'system';
-            div.innerText = text;
-            document.getElementById('messages').appendChild(div);
-            scrollToBottom();
+        function setReply(user, text) {
+            replyTarget = { user, text };
+            document.getElementById('reply-to-user').innerText = `Replying to ${user}`;
+            document.getElementById('reply-to-text').innerText = text;
+            document.getElementById('reply-bar').style.display = 'flex';
+            document.getElementById('msg-input').focus();
         }
 
-        function handleKey(e) {
-            if (e.key === 'Enter') sendMessage();
+        function cancelReply() {
+            replyTarget = null;
+            document.getElementById('reply-bar').style.display = 'none';
         }
 
-        function scrollToBottom() {
-            const msgBox = document.getElementById('messages');
-            msgBox.scrollTop = msgBox.scrollHeight;
+        function handleMsgOptions(e, msgId, user) {
+            e.preventDefault();
+            if (user !== currentUser) return;
+            selectedMsgId = msgId;
+            const menu = document.getElementById('msg-menu');
+            menu.style.display = 'block';
+            menu.style.top = `${e.pageY || e.touches?.[0].pageY}px`;
+            menu.style.left = `${Math.min(window.innerWidth - 120, e.pageX || 100)}px`;
         }
-    </script>
-</body>
-</html>
+
+        function closeMs
