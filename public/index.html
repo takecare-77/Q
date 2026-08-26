@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No Internet</title>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
+        body { background: #f7f7f7; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; }
+
+        /* Game Camouflage */
+        #game-screen { text-align: center; width: 100%; max-width: 400px; padding: 20px; user-select: none; }
+        #game-screen h2 { font-size: 22px; color: #555; margin-bottom: 5px; }
+        #game-screen p { font-size: 13px; color: #888; margin-bottom: 15px; }
+        canvas { background: #fff; border: 1px solid #ccc; border-radius: 6px; display: block; margin: 0 auto; }
+        .jump-btn { margin-top: 15px; padding: 10px 25px; font-weight: bold; background: #555; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+
+        /* Hidden Auth UI */
+        .box { display: none; background: #1a1a1a; padding: 25px; border-radius: 8px; width: 330px; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .box h2 { margin-bottom: 12px; font-size: 18px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 8px 0; background: #2b2b2b; border: 1px solid #444; color: #fff; border-radius: 5px; outline: none; }
+        button { width: 100%; padding: 10px; background: #007bff; border: none; color: #fff; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 4px; }
+        button:hover { background: #0056b3; }
+
+        /* Chat Layout */
+        #chat-section { display: none; width: 95%; max-width: 440px; height: 85vh; flex-direction: column; background: #1a1a1a; border-radius: 8px; overflow: hidden; color: #fff; }
+        .chat-header { padding: 10px 12px; background: #242424; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; gap: 5px; }
+        .header-actions { display: flex; gap: 6px; }
+        .btn-sm { padding: 6px 10px; font-size: 11px; border: none; border-radius: 4px; cursor: pointer; color: #fff; font-weight: bold; }
+        .btn-history { background: #17a2b8; }
+        .btn-clear { background: #e0a800; color: #000; }
+        .btn-panic { background: #dc3545; }
+
+        #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .msg { padding: 8px 12px; border-radius: 6px; max-width: 78%; font-size: 13px; line-height: 1.4; word-break: break-word; }
+        .me { background: #007bff; align-self: flex-end; }
+        .other { background: #333; align-self: flex-start; }
+        .system { align-self: center; font-size: 10px; color: #777; }
+
+        .chat-input { display: flex; padding: 10px; background: #141414; gap: 6px; }
+        .chat-input input { margin: 0; }
+        .chat-input button { width: 65px; margin: 0; }
+    </style>
+</head>
+<body>
+
+    <!-- Game Screen -->
+    <div id="game-screen">
+        <h2>No Internet</h2>
+        <p>Try checking your connection or network cables.</p>
+        <canvas id="gameCanvas" width="340" height="150"></canvas>
+        <button class="jump-btn" onclick="jump()">TAP TO JUMP</button>
+    </div>
+
+    <!-- Hidden Login Form -->
+    <div class="box" id="login-section">
+        <h2>Identity Check</h2>
+        <input type="text" id="username" placeholder="Username" autocomplete="off">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Authenticate</button>
+        <p id="err" style="color: #ff5252; font-size: 11px; margin-top: 8px; text-align: center;"></p>
+    </div>
+
+    <!-- 4-Digit History PIN Prompt -->
+    <div class="box" id="pin-modal" style="position: absolute; z-index: 100;">
+        <h2>Enter 4-Digit History PIN</h2>
+        <input type="password" id="history-pin" maxlength="4" placeholder="••••" style="letter-spacing: 5px; text-align: center;">
+        <button onclick="unlockHistory()">Unlock History</button>
+        <button onclick="closePinModal()" style="background: #444; margin-top: 6px;">Cancel</button>
+        <p id="pin-err" style="color: #ff5252; font-size: 11px; margin-top: 8px; text-align: center;"></p>
+    </div>
+
+    <!-- Chat Screen -->
+    <div id="chat-section">
+        <div class="chat-header">
+            <span id="user-display" style="font-size: 12px; font-weight: bold;"></span>
+            <div class="header-actions">
+                <button class="btn-sm btn-history" onclick="showPinPrompt()">History</button>
+                <button class="btn-sm btn-clear" onclick="clearAllChat()">Clear</button>
+                <button class="btn-sm btn-panic" onclick="exitSafety()">Exit</button>
+            </div>
+        </div>
+        <div id="messages"></div>
+        <div class="chat-input">
+            <input type="text" id="msg-input" placeholder="Type a message..." onkeypress="handleKey(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Reload Security
+        if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
+            window.location.replace("https://www.google.com");
+        }
+
+        // Mini Runner Game Engine
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        let dino = { x: 30, y: 110, w: 20, h: 20, dy: 0, jumpPower: -8, gravity: 0.4, grounded: true };
+        let obstacle = { x: 340, y: 115, w: 15, h: 15, speed: 4 };
+        let score = 0;
+        let gameLoop;
+
+        function jump() {
+            if (dino.grounded) {
+                dino.dy = dino.jumpPower;
+                dino.grounded = false;
+            }
+        }
+
+        function updateGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Ground
+            ctx.strokeStyle = "#ccc";
+            ctx.beginPath();
+            ctx.moveTo(0, 130);
+            ctx.lineTo(340, 130);
+            ctx.stroke();
+
+            // Dino
+            dino.dy += dino.gravity;
+            dino.y += dino.dy;
+            if (dino.y >= 110) { dino.y = 110; dino.dy = 0; dino.grounded = true; }
+            ctx.fillStyle = "#555";
+            ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
+
+            // Obstacle
+            obstacle.x -= obstacle.speed;
+            if (obstacle.x < -20) {
+                obstacle.x = 340;
+                score++;
+            }
+            ctx.fillStyle = "#777";
+            ctx.fillRect(obstacle.x, obstacle.y, obstacle.w, obstacle.h);
+
+            // Score Counter
+            ctx.fillStyle = "#333";
+            ctx.font = "12px Arial";
+            ctx.fillText(`Score: ${score}`, 280, 20);
+
+            // Hit logic
+            if (obstacle.x < dino.x + dino.w && obstacle.x + obstacle.w > dino.x && dino.y + dino.h > obstacle.y) {
+                score = 0;
+                obstacle.x = 340;
+            }
+
+            gameLoop = requestAnimationFrame(updateGame);
+        }
+        updateGame();
+
+        // --- HIDDEN TRIGGERS ---
+        function triggerLoginScreen() {
+            cancelAnimationFrame(gameLoop);
+            document.body.style.background = "#121212";
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+        }
+
+        // Trigger 1 (Keyboard): 'open' type karte hi unlock
+        let keyHistory = "";
+        document.addEventListener("keydown", (e) => {
+            if (e.code === "Space") {
+                jump();
+                return;
+            }
+            keyHistory += e.key.toLowerCase();
+            if (keyHistory.length > 4) keyHistory = keyHistory.slice(-4);
+            if (keyHistory === "open") {
+                triggerLoginScreen();
+            }
+        });
+
+        // Trigger 2 (Mobile): Canvas ke Top-Right (Score par) 1.5 second Long Press
+        let pressTimer;
+        canvas.addEventListener("touchstart", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const touchX = e.touches[0].clientX - rect.left;
+            const touchY = e.touches[0].clientY - rect.top;
+
+            if (touchX > 250 && touchY < 40) {
+                pressTimer = setTimeout(() => {
+                    triggerLoginScreen();
+                }, 1500);
+            }
+        });
+
+        canvas.addEventListener("touchend", () => clearTimeout(pressTimer));
+
+        // --- AUTH & CHAT LOGIC ---
+        let socket;
+        let currentUser = '';
+
+        function exitSafety() {
+            window.location.replace("https://www.google.com");
+        }
+
+        async function login() {
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value.trim();
+
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                currentUser = u;
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('chat-section').style.display = 'flex';
+                document.getElementById('user-display').innerText = `@${currentUser}`;
+
+                socket = io();
+                socket.emit('joinRoom', currentUser);
+
+                socket.on('message', (msg) => renderMessage(msg));
+                socket.on('chatCleared', () => {
+                    document.getElementById('messages').innerHTML = '';
+                    renderSystemMessage("--- Chat has been cleared ---");
+                });
+                socket.on('systemMessage', (text) => renderSystemMessage(text));
+            } else {
+                document.getElementById('err').innerText = data.message;
+            }
+        }
+
+        function showPinPrompt() {
+            document.getElementById('pin-modal').style.display = 'block';
+            document.getElementById('history-pin').value = '';
+            document.getElementById('pin-err').innerText = '';
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal').style.display = 'none';
+        }
+
+        async function unlockHistory() {
+            const pin = document.getElementById('history-pin').value.trim();
+            const res = await fetch('/api/history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                document.getElementById('messages').innerHTML = '';
+                data.history.forEach(msg => renderMessage(msg));
+                closePinModal();
+                renderSystemMessage("--- History Loaded ---");
+            } else {
+                document.getElementById('pin-err').innerText = data.message;
+            }
+        }
+
+        function clearAllChat() {
+            if (confirm("Permanently delete chat for both users?")) {
+                socket.emit('clearHistory');
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('msg-input');
+            if (!input.value.trim()) return;
+            socket.emit('chatMessage', { user: currentUser, text: input.value });
+            input.value = '';
+        }
+
+        function renderMessage(msg) {
+            const div = document.createElement('div');
+            div.className = `msg ${msg.user === currentUser ? 'me' : 'other'}`;
+            div.innerHTML = `<strong>${msg.user}:</strong> ${msg.text} <div style="font-size:9px; opacity:0.6; text-align:right; margin-top:2px;">${msg.time}</div>`;
+            document.getElementById('messages').appendChild(div);
+            scrollToBottom();
+        }
+
+        function renderSystemMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'system';
+            div.innerText = text;
+            document.getElementById('messages').appendChild(div);
+            scrollToBottom();
+        }
+
+        function handleKey(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function scrollToBottom() {
+            const msgBox = document.getElementById('messages');
+            msgBox.scrollTop = msgBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
