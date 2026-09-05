@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TrendStore - Fashion & Lifestyle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrendStore</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #111b21; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         #shop-view { width: 100%; max-width: 480px; background: #fff; min-height: 100vh; padding-bottom: 30px; color: #222; }
         .top-navbar { background: #9c27b0; color: #fff; padding: 12px; position: sticky; top: 0; z-index: 10; }
-        .brand-name { font-size: 18px; font-weight: bold; margin-bottom: 8px; display: block; }
         .search-input { width: 100%; padding: 10px; border-radius: 6px; border: none; outline: none; font-size: 14px; }
         .promo { background: #f80759; color: #fff; padding: 12px; text-align: center; font-size: 13px; }
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
@@ -19,194 +18,76 @@
         .title { font-size: 12px; color: #333; margin-bottom: 6px; height: 30px; overflow: hidden; }
         .price { font-size: 14px; font-weight: bold; color: #000; margin-bottom: 6px; }
         .btn { margin-top: auto; text-decoration: none; padding: 6px; background: #fdf2fe; border: 1px solid #9c27b0; color: #9c27b0; text-align: center; font-size: 11px; font-weight: bold; border-radius: 4px; }
-        .loading-text { text-align: center; padding: 15px; font-size: 12px; color: #666; grid-column: span 2; }
         
         #login-section { display: none; background: #1f2c34; padding: 25px; border-radius: 8px; width: 90%; max-width: 320px; margin-top: 25vh; text-align: center; }
         .auth-input { width: 100%; padding: 10px; margin: 8px 0; background: #2a3942; border: 1px solid #33444d; color: #fff; border-radius: 4px; outline: none; }
         .auth-btn { width: 100%; padding: 10px; background: #00a884; border: none; color: #fff; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
 
         #chat-section { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; background: #0b141a; position: relative; }
-        .wa-header { height: 60px; background: #202c33; display: flex; align-items: center; padding: 0 10px; gap: 10px; border-bottom: 1px solid #2a3942; }
-        .peer-info { flex: 1; }
-        .peer-name { font-size: 16px; font-weight: 600; color: #e9edef; }
-        .peer-status { font-size: 11px; color: #8696a0; height: 14px; }
-        .wa-actions { display: flex; align-items: center; gap: 4px; }
-        .wa-btn { background: none; border: none; font-size: 16px; color: #aebac1; cursor: pointer; padding: 6px; }
-
-        #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background-image: radial-gradient(#182229 10%, transparent 11%); background-size: 18px 18px; }
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 78%; }
-        .msg-wrapper.me { align-self: flex-end; }
-        .msg-wrapper.other { align-self: flex-start; }
-        .msg-bubble { padding: 6px 9px 4px 9px; border-radius: 8px; font-size: 14.2px; line-height: 1.35; word-break: break-word; background: #202c33; color: #e9edef; }
-        .me .msg-bubble { background: #005c4b; }
-        .tick { font-size: 12px; color: #8696a0; margin-left: 3px; }
-        .tick.seen { color: #53bdeb; }
-
-        .chat-footer { padding: 8px; background: #202c33; display: flex; align-items: center; gap: 6px; }
-        .wa-input-pill { flex: 1; background: #2a3942; border-radius: 24px; display: flex; align-items: center; padding: 4px 12px; }
-        .wa-input-pill input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 15px; padding: 6px 0; }
-        .send-round-btn { width: 40px; height: 40px; background: #00a884; border-radius: 50%; border: none; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
-
-        #pin-modal, #deleted-box-view, #call-screen, #incoming-modal { display: none; position: fixed; inset: 0; z-index: 100; }
-        #pin-modal { background: rgba(0,0,0,0.85); justify-content: center; align-items: center; }
-        .modal-box { background: #202c33; border-radius: 12px; padding: 22px; width: 85%; max-width: 320px; text-align: center; }
-        #deleted-box-view { background: #0b141a; flex-direction: column; z-index: 150; }
-        .deleted-box-header { height: 60px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid #2a3942; }
-
-        #call-screen { background: #0b141a; z-index: 200; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 10px 40px; }
-        .call-video-container { position: relative; width: 100%; max-width: 450px; flex: 1; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        #remote-video { width: 100%; height: 100%; object-fit: cover; }
-        #local-video { position: absolute; right: 12px; top: 12px; width: 100px; height: 130px; object-fit: cover; border-radius: 8px; border: 2px solid #00a884; background: #222; }
-        .call-controls { display: flex; gap: 16px; align-items: center; }
-        .ctrl-btn { width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; color: #fff; background: #2a3942; display: flex; align-items: center; justify-content: center; }
-        .ctrl-btn.off { background: #ff9800; color: #111; }
-        .end-call-btn { width: 56px; height: 56px; border-radius: 50%; background: #ea0038; border: none; font-size: 22px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; }
-        #incoming-modal { top: 20px; bottom: auto; width: 90%; max-width: 400px; margin: 0 auto; background: #202c33; border-radius: 12px; padding: 14px; z-index: 250; box-shadow: 0 5px 20px rgba(0,0,0,0.6); align-items: center; justify-content: space-between; display: none; }
+        .wa-header { height: 60px; background: #202c33; display: flex; align-items: center; padding: 0 12px; justify-content: space-between; border-bottom: 1px solid #2a3942; }
+        #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        .msg { background: #005c4b; color: #fff; padding: 6px 10px; border-radius: 6px; max-width: 75%; align-self: flex-end; font-size: 14px; word-break: break-word; }
+        .chat-footer { padding: 8px; background: #202c33; display: flex; gap: 6px; align-items: center; }
+        .chat-footer input { flex: 1; padding: 8px 12px; background: #2a3942; border: none; outline: none; color: #fff; border-radius: 20px; font-size: 14px; }
+        .send-btn { background: #00a884; border: none; color: #fff; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <input type="file" id="media-input" accept="image/*" style="display:none;" onchange="uploadImage(event)">
-
-    <div id="incoming-modal">
-        <div>
-            <div style="font-size: 14px; font-weight: bold; color: #00a884;" id="incoming-caller">Incoming Call...</div>
-            <div style="font-size:11px; color:#8696a0;">Secure Stream Connecting</div>
-        </div>
-        <div style="display: flex; gap: 8px;">
-            <button onclick="acceptIncoming()" style="background:#00a884; border:none; padding:8px 14px; color:#fff; border-radius:6px; font-weight:bold; cursor:pointer;">Accept</button>
-            <button onclick="rejectIncoming()" style="background:#ea0038; border:none; padding:8px 14px; color:#fff; border-radius:6px; font-weight:bold; cursor:pointer;">Decline</button>
-        </div>
-    </div>
-
-    <div id="call-screen">
-        <div style="color: #8696a0; font-size: 14px; margin-top: 15px;" id="call-label">Encrypted Call...</div>
-        <div class="call-video-container">
-            <video id="remote-video" autoplay playsinline></video>
-            <video id="local-video" autoplay playsinline muted></video>
-        </div>
-        <div class="call-controls">
-            <button id="mic-toggle-btn" class="ctrl-btn" onclick="toggleAudio()">🎙️</button>
-            <button id="cam-toggle-btn" class="ctrl-btn" onclick="toggleVideo()">📷</button>
-            <button class="end-call-btn" onclick="hangUp()">📴</button>
-        </div>
-    </div>
-
-    <div id="pin-modal">
-        <div class="modal-box">
-            <h3 style="color:#00a884; margin-bottom:10px;">Secret Deleted Vault</h3>
-            <p style="font-size: 12px; color: #8696a0; margin-bottom: 10px;">Enter PIN (1717)</p>
-            <input type="password" id="vault-pin-input" class="auth-input" placeholder="Enter PIN">
-            <button class="auth-btn" onclick="submitVaultPin()">Open Vault</button>
-            <button class="auth-btn" style="background: #39444d; margin-top: 6px;" onclick="document.getElementById('pin-modal').style.display='none'">Cancel</button>
-            <p id="pin-err" style="color: #ff5252; font-size: 11px; margin-top: 8px;"></p>
-        </div>
-    </div>
-
-    <div id="deleted-box-view">
-        <div class="deleted-box-header">
-            <span style="font-weight:bold;">🗑️ Deleted Messages Vault</span>
-            <button class="wa-btn" style="background: #00a884; color: #fff; padding: 6px 12px; border-radius: 4px;" onclick="document.getElementById('deleted-box-view').style.display='none'">Back</button>
-        </div>
-        <div id="deleted-messages-list" style="flex:1; padding:14px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
-    </div>
-
     <div id="shop-view">
         <div class="top-navbar">
-            <span class="brand-name">TrendStore</span>
+            <span style="font-size:18px; font-weight:bold; display:block; margin-bottom:8px;">TrendStore</span>
             <form onsubmit="handleSearch(event)">
-                <input type="text" id="store-search" class="search-input" placeholder="Search Sarees, Kurtis, Shoes, Hoodies..." autocomplete="off">
+                <input type="text" id="store-search" class="search-input" placeholder="Search or type t9..." autocomplete="off">
             </form>
         </div>
         <div class="promo">Mega Clearance Sale • Free Delivery 🔥</div>
         <div class="grid" id="product-list"></div>
-        <div id="loader" class="loading-text" style="display:none;">Loading more trends...</div>
     </div>
 
     <div id="login-section">
-        <h3 style="color:#00a884; margin-bottom:15px;">WhatsApp Secure Sign-in</h3>
-        <input type="text" id="user-input" class="auth-input" placeholder="Your Username (e.g. user1)">
-        <input type="password" id="pass-input" class="auth-input" placeholder="Secret Password (1717)">
-        <button class="auth-btn" onclick="startSession()">Login</button>
-        <p id="login-err" style="color: #ff5252; font-size: 11px; margin-top: 8px;"></p>
+        <h3 style="color:#00a884; margin-bottom:12px;">Secure Sign-in</h3>
+        <input type="text" id="user-input" class="auth-input" placeholder="Username (e.g. user1)">
+        <input type="password" id="pass-input" class="auth-input" placeholder="Password (1717)">
+        <button class="auth-btn" onclick="login()">Login</button>
+        <p id="err-msg" style="color:#ff5252; font-size:11px; margin-top:8px;"></p>
     </div>
 
     <div id="chat-section">
         <div class="wa-header">
-            <div class="peer-info">
-                <div class="peer-name" id="chat-title">Chat Room</div>
-                <div class="peer-status" id="status-display">online</div>
-            </div>
-            <div class="wa-actions">
-                <button class="wa-btn" title="Audio Call" onclick="startCall('audio')">🎧</button>
-                <button class="wa-btn" title="Video Call" onclick="startCall('video')">📹</button>
-                <button class="wa-btn" title="Move to Deleted Box" onclick="deleteChatToVault()">🗑️</button>
-                <button class="wa-btn" title="Open Deleted Box (PIN: 1717)" onclick="document.getElementById('pin-modal').style.display='flex'">📂</button>
-                <button class="wa-btn" title="Exit" onclick="location.reload()">✖</button>
+            <span style="font-weight:bold; font-size:16px;" id="chat-title">Chat</span>
+            <div>
+                <button onclick="vaultAction()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;" title="Vault">🗑️</button>
+                <button onclick="location.reload()" style="background:none; border:none; color:#8696a0; font-size:14px; cursor:pointer; margin-left:8px;">✖</button>
             </div>
         </div>
-
         <div id="messages"></div>
-
         <div class="chat-footer">
-            <div class="wa-input-pill">
-                <button class="wa-btn" onclick="document.getElementById('media-input').click()" style="padding:0 4px;">📎</button>
-                <input type="text" id="type-input" placeholder="Message" oninput="sendTyping()" onkeypress="if(event.key==='Enter') sendMessage()">
-            </div>
-            <button class="send-round-btn" onclick="sendMessage()">➤</button>
+            <input type="text" id="type-input" placeholder="Type a message" onkeypress="if(event.key==='Enter') sendMsg()">
+            <button class="send-btn" onclick="sendMsg()">➤</button>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const baseProducts = [
-            { title: "Women Printed Rayon Anarkali Kurta", price: "₹349", source: "Meesho", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70" },
-            { title: "Men White Casual Lightweight Sneakers", price: "₹499", source: "Flipkart", img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70" },
-            { title: "Wireless Bluetooth Earbuds with ANC", price: "₹1,299", source: "Amazon", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70" },
-            { title: "Floral Print Georgette Maxi Dress", price: "₹899", source: "Myntra", img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70" },
+        const products = [
+            { title: "Women Printed Anarkali Kurta", price: "₹349", source: "Meesho", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70" },
+            { title: "Men White Casual Sneakers", price: "₹499", source: "Flipkart", img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70" },
+            { title: "Wireless Bluetooth Earbuds", price: "₹1,299", source: "Amazon", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70" },
+            { title: "Floral Print Maxi Dress", price: "₹899", source: "Myntra", img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70" },
             { title: "Slim Fit Cotton Denim Jeans", price: "₹749", source: "Ajio", img: "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70" },
-            { title: "Matte Liquid Longstay Lipstick", price: "₹299", source: "Nykaa", img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70" },
-            { title: "Bluetooth Calling Smartwatch 1.83\"", price: "₹999", source: "Amazon", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70" },
-            { title: "Kanjivaram Silk Blend Woven Saree", price: "₹549", source: "Meesho", img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70" },
-            { title: "Men Pure Cotton Casual Polo T-Shirt", price: "₹349", source: "Ajio", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=350&q=70" },
-            { title: "Water Resistant Laptop Backpack 30L", price: "₹429", source: "Flipkart", img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70" },
-            { title: "Oversized Streetwear Unisex Hoodie", price: "₹599", source: "Amazon", img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=350&q=70" },
-            { title: "High-Rise Stretchable Workout Leggings", price: "₹399", source: "Myntra", img: "https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=350&q=70" },
-            { title: "Vintage UV Protected Sunglasses", price: "₹249", source: "Flipkart", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70" },
-            { title: "Vitamin C Brightening Face Serum", price: "₹399", source: "Nykaa", img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=350&q=70" },
-            { title: "Embroidered Semi-Stitched Lehenga Choli", price: "₹1,149", source: "Meesho", img: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=350&q=70" },
-            { title: "Men Solid Regular Casual Shirt", price: "₹499", source: "Ajio", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=350&q=70" },
-            { title: "Stainless Steel Insulated Water Bottle 1L", price: "₹449", source: "Amazon", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70" },
-            { title: "Women Pointed Toe Block Heel Sandals", price: "₹649", source: "Myntra", img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=350&q=70" },
-            { title: "Fast Charging 20000mAh Power Bank", price: "₹1,099", source: "Flipkart", img: "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70" },
-            { title: "Herbal Onion Hair Oil for Fall Control", price: "₹249", source: "Nykaa", img: "https://images.unsplash.com/photo-1608248597359-009772a806ff?w=350&q=70" }
+            { title: "Matte Longstay Lipstick", price: "₹299", source: "Nykaa", img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70" }
         ];
 
-        let shuffledCatalog = [...baseProducts].sort(() => 0.5 - Math.random());
-        let displayedCount = 0;
-
-        function loadMoreProducts() {
-            const container = document.getElementById('product-list');
-            const loader = document.getElementById('loader');
-            if (displayedCount >= shuffledCatalog.length) { loader.style.display = 'none'; return; }
-            loader.style.display = 'block';
-            setTimeout(() => {
-                const nextBatch = shuffledCatalog.slice(displayedCount, displayedCount + 12);
-                let html = '';
-                nextBatch.forEach(p => {
-                    const searchUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.title + " " + p.source)}`;
-                    html += `<div class="card"><img src="${p.img}" loading="lazy"><div class="card-body"><div class="title">${p.title}</div><div class="price">${p.price}</div><a href="${searchUrl}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
-                });
-                container.insertAdjacentHTML('beforeend', html);
-                displayedCount += 12;
-                loader.style.display = 'none';
-            }, 300);
+        function render() {
+            let html = '';
+            products.forEach(p => {
+                const searchUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.title + " " + p.source)}`;
+                html += `<div class="card"><img src="${p.img}"><div class="card-body"><div class="title">${p.title}</div><div class="price">${p.price}</div><a href="${searchUrl}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
+            });
+            document.getElementById('product-list').innerHTML = html;
         }
-
-        loadMoreProducts();
-        window.addEventListener('scroll', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) loadMoreProducts();
-        });
+        render();
 
         function handleSearch(e) {
             e.preventDefault();
@@ -220,13 +101,10 @@
         }
 
         let socket, currentUser = '';
-        let localStream, peerConn, pendingSignal;
-        let isAudioMuted = false, isVideoOff = false;
-
-        async function startSession() {
+        async function login() {
             const u = document.getElementById('user-input').value.trim();
             const p = document.getElementById('pass-input').value.trim();
-            if (!u || !p) return;
+            if(!u || !p) return;
 
             try {
                 const res = await fetch('/api/login', {
@@ -235,54 +113,41 @@
                     body: JSON.stringify({ username: u, password: p })
                 });
                 const data = await res.json();
-                if (data.success) {
+                if(data.success) {
                     currentUser = u;
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('chat-section').style.display = 'flex';
-                    document.getElementById('chat-title').innerText = u;
-                    initSocket();
+                    document.getElementById('chat-title').innerText = currentUser;
+                    socket = io();
+                    socket.emit('joinRoom', currentUser);
+                    socket.on('message', (msg) => {
+                        const box = document.getElementById('messages');
+                        box.innerHTML += `<div class="msg">${msg.text}</div>`;
+                        box.scrollTop = box.scrollHeight;
+                    });
                 } else {
-                    document.getElementById('login-err').innerText = 'Invalid Password (Use: 1717)';
+                    document.getElementById('err-msg').innerText = "Incorrect Password! (Use 1717)";
                 }
-            } catch (err) {
-                document.getElementById('login-err').innerText = 'Login error occurred';
+            } catch(err) {
+                document.getElementById('err-msg').innerText = "Login failed";
             }
         }
 
-        function initSocket() {
-            socket = io();
-            socket.emit('joinRoom', currentUser);
-            socket.emit('markSeen', currentUser);
+        function sendMsg() {
+            const inp = document.getElementById('type-input');
+            if(!inp.value.trim()) return;
+            socket.emit('chatMessage', { user: currentUser, text: inp.value });
+            inp.value = '';
+        }
 
-            socket.on('initialLiveMessages', (list) => {
-                document.getElementById('messages').innerHTML = '';
-                list.forEach(m => renderBubble(m, 'messages'));
-            });
-
-            socket.on('message', (msg) => {
-                renderBubble(msg, 'messages');
-                if (msg.user !== currentUser) socket.emit('markSeen', currentUser);
-            });
-
-            socket.on('typing', (data) => {
-                if (data.user !== currentUser) {
-                    document.getElementById('status-display').innerText = data.isTyping ? 'typing...' : 'online';
-                }
-            });
-
-            socket.on('seenUpdate', () => {
-                document.querySelectorAll('.tick').forEach(t => {
-                    t.innerText = '✓✓';
-                    t.classList.add('seen');
-                });
-            });
-
-            socket.on('liveChatCleared', () => {
-                document.getElementById('messages').innerHTML = '';
-            });
-
-            socket.on('deletedBoxData', (list) => {
-                document.getElementById('pin-modal').style.display = 'none';
-                const container = document.getElementById('deleted-messages-list');
-                container.innerHTML = '';
-              
+        function vaultAction() {
+            const pin = prompt("Enter Vault PIN (1717):");
+            if(pin === "1717" && socket) {
+                socket.emit('openDeletedBox', pin);
+            } else if(pin) {
+                alert("Incorrect PIN!");
+            }
+        }
+    </script>
+</body>
+</html>
