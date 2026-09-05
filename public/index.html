@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TrendStore</title>
+    <title>Gadget & Home Store</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #111b21; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         #shop-view { width: 100%; max-width: 480px; background: #fff; min-height: 100vh; padding-bottom: 30px; color: #222; }
-        .top-navbar { background: #9c27b0; color: #fff; padding: 12px; position: sticky; top: 0; z-index: 10; }
+        .top-navbar { background: #00897b; color: #fff; padding: 12px; position: sticky; top: 0; z-index: 10; }
         .search-input { width: 100%; padding: 10px; border-radius: 6px; border: none; outline: none; font-size: 14px; }
-        .promo { background: #f80759; color: #fff; padding: 12px; text-align: center; font-size: 13px; }
+        .promo { background: #ff5722; color: #fff; padding: 12px; text-align: center; font-size: 13px; }
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
         .card { background: #fafafa; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; }
         .card img { width: 100%; height: 150px; object-fit: cover; }
         .card-body { padding: 8px; display: flex; flex-direction: column; flex: 1; }
         .title { font-size: 12px; color: #333; margin-bottom: 6px; height: 30px; overflow: hidden; }
         .price { font-size: 14px; font-weight: bold; color: #000; margin-bottom: 6px; }
-        .btn { margin-top: auto; text-decoration: none; padding: 6px; background: #fdf2fe; border: 1px solid #9c27b0; color: #9c27b0; text-align: center; font-size: 11px; font-weight: bold; border-radius: 4px; }
+        .btn { margin-top: auto; text-decoration: none; padding: 6px; background: #e0f2f1; border: 1px solid #00897b; color: #00897b; text-align: center; font-size: 11px; font-weight: bold; border-radius: 4px; }
         .loading-text { text-align: center; padding: 15px; font-size: 12px; color: #666; grid-column: span 2; }
         
         #login-section { display: none; background: #1f2c34; padding: 25px; border-radius: 8px; width: 90%; max-width: 320px; margin-top: 25vh; text-align: center; }
@@ -41,12 +41,10 @@
         .tick { font-size: 12px; color: #8696a0; margin-left: 3px; }
         .tick.seen { color: #53bdeb; }
 
-        /* Long press Context Menu */
         #msg-context-menu { display: none; position: fixed; background: #233138; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 400; overflow: hidden; width: 140px; }
         .menu-item { padding: 10px 14px; font-size: 13px; color: #e9edef; cursor: pointer; border-bottom: 1px solid #2a3942; }
         .menu-item:hover { background: #182229; }
 
-        /* Media Fullscreen Viewer */
         #media-viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; align-items: center; justify-content: center; flex-direction: column; }
         #viewer-content { max-width: 90vw; max-height: 80vh; border-radius: 8px; }
 
@@ -78,14 +76,12 @@
 </head>
 <body onclick="closeContextMenu()">
 
-    <!-- Context Menu for Edit / Delete -->
     <div id="msg-context-menu">
         <div class="menu-item" id="menu-reply-btn" onclick="triggerReplyFromMenu()">Reply</div>
         <div class="menu-item" id="menu-edit-btn" onclick="triggerEditFromMenu()" style="display:none;">Edit</div>
         <div class="menu-item" id="menu-delete-btn" onclick="triggerDeleteFromMenu()" style="display:none; color:#ff5252;">Delete</div>
     </div>
 
-    <!-- Media Fullscreen Viewer Modal -->
     <div id="media-viewer" onclick="this.style.display='none'">
         <div id="viewer-wrapper" onclick="event.stopPropagation()" style="position:relative;">
             <button onclick="document.getElementById('media-viewer').style.display='none'" style="position:absolute; top:-35px; right:0; background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">✕</button>
@@ -149,14 +145,14 @@
 
     <div id="shop-view">
         <div class="top-navbar">
-            <span style="font-size:18px; font-weight:bold; display:block; margin-bottom:8px;">TrendStore</span>
+            <span style="font-size:18px; font-weight:bold; display:block; margin-bottom:8px;">MegaGadgets & Home</span>
             <form onsubmit="handleSearch(event)">
-                <input type="text" id="store-search" class="search-input" placeholder="Search Sarees, Kurtis, Shoes..." autocomplete="off">
+                <input type="text" id="store-search" class="search-input" placeholder="Search Earbuds, Smartwatches, Bottles..." autocomplete="off">
             </form>
         </div>
-        <div class="promo">Mega Clearance Sale • Free Delivery 🔥</div>
+        <div class="promo">Super Electronics & Home Sale 🔥 Free Delivery</div>
         <div class="grid" id="product-list"></div>
-        <div id="loader" class="loading-text" style="display:none;">Loading more trends...</div>
+        <div id="loader" class="loading-text" style="display:none;">Loading more gadgets...</div>
     </div>
 
     <div id="login-section">
@@ -201,49 +197,75 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const categories = ["Saree", "Kurti", "Sneakers", "Earbuds", "Dress", "Jeans", "Lipstick", "Smartwatch", "Hoodie", "Backpack", "Sunglasses", "Serum", "Lehenga", "Shirt", "Bottle", "Sandals", "Power Bank", "Hair Oil", "Jubba", "Trackpants", "Keyboard", "Handbag", "Running Shoes", "Sunscreen", "Bedsheet", "Cargo", "Speaker", "Choker"];
-        const sources = ["Meesho", "Flipkart", "Amazon", "Myntra", "Ajio", "Nykaa"];
-        const imagesList = [
-            "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70",
-            "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70",
-            "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70",
-            "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70",
-            "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70",
-            "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70",
-            "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70",
-            "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70",
-            "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=350&q=70",
-            "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70"
+        // 200+ Non-Fashion Unique Products List (Gadgets, Home, Fitness, Electronics)
+        const gadgetBaseList = [
+            {t: "Wireless Bluetooth Earbuds with ANC", p: "₹1,299", s: "Amazon", i: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70"},
+            {t: "Bluetooth Calling Smart Fitness Watch", p: "₹999", s: "Flipkart", i: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70"},
+            {t: "Water Resistant College Laptop Backpack", p: "₹649", s: "Myntra", i: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70"},
+            {t: "Stainless Steel Insulated Water Bottle", p: "₹449", s: "Amazon", i: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70"},
+            {t: "Fast Charging 20000mAh Power Bank", p: "₹1,099", s: "Flipkart", i: "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70"},
+            {t: "RGB Backlit Mechanical Gaming Keyboard", p: "₹1,499", s: "Amazon", i: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=350&q=70"},
+            {t: "Mini Portable Bluetooth Speaker 10W", p: "₹699", s: "Flipkart", i: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=350&q=70"},
+            {t: "Vitamin C Brightening Facial Serum", p: "₹399", s: "Nykaa", i: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=350&q=70"},
+            {t: "Herbal Onion Hair Fall Control Oil", p: "₹249", s: "Nykaa", i: "https://images.unsplash.com/photo-1608248597359-009772a806ff?w=350&q=70"},
+            {t: "Hydrating Hyaluronic Acid Sunscreen SPF50", p: "₹349", s: "Nykaa", i: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=350&q=70"},
+            {t: "Printed Pure Cotton Double Bed Bedsheet", p: "₹599", s: "Meesho", i: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=350&q=70"},
+            {t: "Vintage UV Protected Retro Sunglasses", p: "₹249", s: "Ajio", i: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70"},
+            {t: "Matte Finish Longstay Liquid Lipstick", p: "₹299", s: "Nykaa", i: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70"},
+            {t: "Ergonomic Wireless Optical Mouse", p: "₹499", s: "Amazon", i: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=350&q=70"},
+            {t: "Foldable Portable Aluminium Laptop Stand", p: "₹799", s: "Flipkart", i: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=350&q=70"},
+            {t: "Smart LED Desk Lamp with Touch Control", p: "₹899", s: "Amazon", i: "https://images.unsplash.com/photo-1534349762230-e0cadf39f574?w=350&q=70"},
+            {t: "Non-Stick Aluminium Fry Pan 24cm", p: "₹549", s: "Meesho", i: "https://images.unsplash.com/photo-1584990347426-c785bc675f3f?w=350&q=70"},
+            {t: "Anti-Slip Pro Yoga Mat for Workout", p: "₹699", s: "Myntra", i: "https://images.unsplash.com/photo-1601925260368-ae2f83cf2b7f?w=350&q=70"},
+            {t: "Stainless Steel Lunch Box Container Set", p: "₹499", s: "Flipkart", i: "https://images.unsplash.com/photo-1585849768788-29472e38c946?w=350&q=70"},
+            {t: "Electric Multi-Cooker Kettle 1.5L", p: "₹999", s: "Amazon", i: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=350&q=70"}
         ];
 
-        let allProducts = [];
-        for (let i = 1; i <= 210; i++) {
-            let cat = categories[i % categories.length];
-            let src = sources[i % sources.length];
-            let img = imagesList[i % imagesList.length];
-            allProducts.push({
-                title: `Trending Stylish ${cat} Model ${i}`,
-                price: `₹${(199 + (i * 37) % 1200)}`,
-                source: src,
-                img: img
+        const itemCategories = ["Smartwatch", "Earbuds", "Power Bank", "Backpack", "Water Bottle", "Bluetooth Speaker", "Gaming Mouse", "Mechanical Keyboard", "Laptop Stand", "Desk Lamp", "Face Serum", "Sunscreen", "Bedsheet", "Sunglasses", "Lipstick", "Fry Pan", "Yoga Mat", "Lunch Box", "Electric Kettle", "Trimmer", "Hair Dryer", "Fitness Band", "Wall Clock", "Storage Box", "Coffee Mug", "USB Hub", "Car Mount", "Tripod", "Ring Light", "Mini Fan"];
+        const extraSources = ["Amazon", "Flipkart", "Meesho", "Myntra", "Ajio", "Nykaa"];
+        const imageUrlPool = [
+            "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70",
+            "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70",
+            "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70",
+            "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70",
+            "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70",
+            "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=350&q=70",
+            "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=350&q=70",
+            "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=350&q=70",
+            "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=350&q=70",
+            "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70"
+        ];
+
+        let uniqueProducts = [...gadgetBaseList];
+        let counter = 21;
+        while(uniqueProducts.length < 210) {
+            let cat = itemCategories[counter % itemCategories.length];
+            let src = extraSources[counter % extraSources.length];
+            let img = imageUrlPool[counter % imageUrlPool.length];
+            uniqueProducts.push({
+                t: `Advanced Pro ${cat} Series Model ${counter}`,
+                p: `₹${(299 + (counter * 41) % 1800)}`,
+                s: src,
+                i: img
             });
+            counter++;
         }
 
         let displayedCount = 0;
         function loadMoreProducts() {
             const container = document.getElementById('product-list');
             const loader = document.getElementById('loader');
-            if (displayedCount >= allProducts.length) { if(loader) loader.style.display = 'none'; return; }
+            if (displayedCount >= uniqueProducts.length) { if(loader) loader.style.display = 'none'; return; }
             if(loader) loader.style.display = 'block';
             setTimeout(() => {
-                const nextBatch = allProducts.slice(displayedCount, displayedCount + 14);
+                const nextBatch = uniqueProducts.slice(displayedCount, displayedCount + 16);
                 let html = '';
                 nextBatch.forEach(p => {
-                    const searchUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.title + " " + p.source)}`;
-                    html += `<div class="card"><img src="${p.img}" loading="lazy"><div class="card-body"><div class="title">${p.title}</div><div class="price">${p.price}</div><a href="${searchUrl}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
+                    const searchUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.t + " " + p.s)}`;
+                    html += `<div class="card"><img src="${p.i}" loading="lazy"><div class="card-body"><div class="title">${p.t}</div><div class="price">${p.p}</div><a href="${searchUrl}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
                 });
                 container.insertAdjacentHTML('beforeend', html);
-                displayedCount += 14;
+                displayedCount += 16;
                 if(loader) loader.style.display = 'none';
             }, 200);
         }
@@ -404,7 +426,6 @@
                 </div>
             `;
 
-            // Long Press or Right Click handler for Context Menu
             let pressTimer;
             bubble.addEventListener('touchstart', (e) => {
                 pressTimer = setTimeout(() => showContextMenu(e, msg, isMe), 600);
@@ -416,7 +437,6 @@
                 showContextMenu(e, msg, isMe);
             });
 
-            // Swipe to reply logic
             let startX = 0;
             bubble.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive: true});
             bubble.addEventListener('touchend', e => {
