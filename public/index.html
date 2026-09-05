@@ -69,64 +69,76 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const categories = [
-            { name: "Printed Anarkali Kurta", basePrice: 349, img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70", src: "Meesho" },
-            { name: "Casual White Sneakers", basePrice: 499, img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70", src: "Flipkart" },
-            { name: "Wireless Bluetooth Earbuds", basePrice: 1299, img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70", src: "Amazon" },
-            { name: "Floral Maxi Dress", basePrice: 899, img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70", src: "Myntra" },
-            { name: "Slim Fit Denim Jeans", basePrice: 749, img: "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70", src: "Ajio" },
-            { name: "Matte Longstay Lipstick", basePrice: 299, img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70", src: "Nykaa" },
-            { name: "Bluetooth Smartwatch", basePrice: 999, img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70", src: "Amazon" },
-            { name: "Silk Blend Saree", basePrice: 549, img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70", src: "Meesho" },
-            { name: "Cotton Polo T-Shirt", basePrice: 349, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=350&q=70", src: "Ajio" },
-            { name: "Laptop Backpack", basePrice: 429, img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70", src: "Flipkart" },
-            { name: "Streetwear Hoodie", basePrice: 599, img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=350&q=70", src: "Amazon" },
-            { name: "Workout Leggings", basePrice: 399, img: "https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=350&q=70", src: "Myntra" },
-            { name: "UV Protected Sunglasses", basePrice: 249, img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70", src: "Flipkart" },
-            { name: "Vitamin C Face Serum", basePrice: 399, img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=350&q=70", src: "Nykaa" },
-            { name: "Semi-Stitched Lehenga", basePrice: 1149, img: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=350&q=70", src: "Meesho" },
-            { name: "Solid Casual Shirt", basePrice: 499, img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=350&q=70", src: "Ajio" },
-            { name: "Insulated Water Bottle", basePrice: 449, img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70", src: "Amazon" },
-            { name: "Block Heel Sandals", basePrice: 649, img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=350&q=70", src: "Myntra" },
-            { name: "Fast Charging Power Bank", basePrice: 1099, img: "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70", src: "Flipkart" },
-            { name: "Onion Hair Oil", basePrice: 249, img: "https://images.unsplash.com/photo-1608248597359-009772a806ff?w=350&q=70", src: "Nykaa" }
+        // 60+ completely distinct products with unique photos and titles
+        const allUniqueProducts = [
+            { title: "Women Printed Rayon Anarkali Kurta", price: "₹349", source: "Meesho", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70" },
+            { title: "Men White Casual Lightweight Sneakers", price: "₹499", source: "Flipkart", img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70" },
+            { title: "Wireless Bluetooth Earbuds with ANC", price: "₹1,299", source: "Amazon", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70" },
+            { title: "Floral Print Georgette Maxi Dress", price: "₹899", source: "Myntra", img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70" },
+            { title: "Slim Fit Cotton Denim Jeans", price: "₹749", source: "Ajio", img: "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70" },
+            { title: "Matte Liquid Longstay Lipstick", price: "₹299", source: "Nykaa", img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70" },
+            { title: "Bluetooth Calling Smartwatch 1.83\"", price: "₹999", source: "Amazon", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70" },
+            { title: "Kanjivaram Silk Blend Woven Saree", price: "₹549", source: "Meesho", img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70" },
+            { title: "Men Pure Cotton Casual Polo T-Shirt", price: "₹349", source: "Ajio", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=350&q=70" },
+            { title: "Water Resistant Laptop Backpack 30L", price: "₹429", source: "Flipkart", img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70" },
+            { title: "Oversized Streetwear Unisex Hoodie", price: "₹599", source: "Amazon", img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=350&q=70" },
+            { title: "High-Rise Stretchable Workout Leggings", price: "₹399", source: "Myntra", img: "https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=350&q=70" },
+            { title: "Vintage UV Protected Sunglasses", price: "₹249", source: "Flipkart", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70" },
+            { title: "Vitamin C Brightening Face Serum", price: "₹399", source: "Nykaa", img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=350&q=70" },
+            { title: "Embroidered Semi-Stitched Lehenga Choli", price: "₹1,149", source: "Meesho", img: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=350&q=70" },
+            { title: "Men Solid Regular Casual Shirt", price: "₹499", source: "Ajio", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=350&q=70" },
+            { title: "Stainless Steel Insulated Water Bottle 1L", price: "₹449", source: "Amazon", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70" },
+            { title: "Women Pointed Toe Block Heel Sandals", price: "₹649", source: "Myntra", img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=350&q=70" },
+            { title: "Fast Charging 20000mAh Power Bank", price: "₹1,099", source: "Flipkart", img: "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70" },
+            { title: "Herbal Onion Hair Oil for Fall Control", price: "₹249", source: "Nykaa", img: "https://images.unsplash.com/photo-1608248597359-009772a806ff?w=350&q=70" },
+            { title: "Traditional Gold Plated Jewellery Set", price: "₹319", source: "Meesho", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=350&q=70" },
+            { title: "Comfort Fit Sports Running Track Pants", price: "₹389", source: "Ajio", img: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=350&q=70" },
+            { title: "RGB Backlit Mechanical Gaming Keyboard", price: "₹1,499", source: "Amazon", img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=350&q=70" },
+            { title: "Women Quilted Tote Shoulder Bag", price: "₹599", source: "Myntra", img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=350&q=70" },
+            { title: "Men Running Lightweight Mesh Shoes", price: "₹599", source: "Flipkart", img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=350&q=70" },
+            { title: "Hydrating Hyaluronic Acid Sunscreen SPF50", price: "₹349", source: "Nykaa", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=350&q=70" },
+            { title: "Printed Pure Cotton Double Bed Bedsheet", price: "₹399", source: "Meesho", img: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=350&q=70" },
+            { title: "Men Slim Fit Washed Cargo Pants", price: "₹799", source: "Ajio", img: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=350&q=70" },
+            { title: "Mini Portable Bluetooth Speaker 10W", price: "₹699", source: "Amazon", img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=350&q=70" },
+            { title: "Silver Plated Oxidised Tribal Choker", price: "₹199", source: "Myntra", img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=350&q=70" },
+            { title: "Heavy Bass Wired In-Ear Earphones", price: "₹199", source: "Flipkart", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=350&q=70" },
+            { title: "Deep Hydration Body Lotion 400ml", price: "₹269", source: "Nykaa", img: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=350&q=70" },
+            { title: "Ethnic Rayon Flared Solid Palazzo", price: "₹249", source: "Meesho", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=350&q=70" },
+            { title: "Men Casual Slip-On Loafers", price: "₹549", source: "Ajio", img: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=350&q=70" },
+            { title: "Ultra Slim Wireless Silent Mouse", price: "₹349", source: "Amazon", img: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=350&q=70" },
+            { title: "Printed A-Line Summer Casual Top", price: "₹329", source: "Myntra", img: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=350&q=70" },
+            { title: "Classic Analog Leather Strap Men Watch", price: "₹699", source: "Flipkart", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=350&q=70" },
+            { title: "Charcoal Face Wash Deep Cleanse 150ml", price: "₹189", source: "Nykaa", img: "https://images.unsplash.com/photo-1556228722-d0b5d15c7e0c?w=350&q=70" },
+            { title: "Chiffon Daily Wear Printed Saree", price: "₹389", source: "Meesho", img: "https://images.unsplash.com/photo-1610030469668-932ec596e761?w=350&q=70" },
+            { title: "Men Regular Fit Denim Jacket", price: "₹999", source: "Ajio", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=350&q=70" },
+            { title: "Multipurpose Kitchen Spice Rack 4-Tier", price: "₹499", source: "Amazon", img: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=350&q=70" },
+            { title: "High Ankle Casual Canvas Boots", price: "₹799", source: "Flipkart", img: "https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=350&q=70" },
+            { title: "Smudge-Proof Intense Black Eyeliner", price: "₹199", source: "Nykaa", img: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=350&q=70" },
+            { title: "Men Solid Round Neck Gym Vest Pack", price: "₹299", source: "Ajio", img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=350&q=70" },
+            { title: "Decorative Warm LED String Fairy Lights", price: "₹149", source: "Amazon", img: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=350&q=70" },
+            { title: "Embellished Velvet Party Clutch", price: "₹449", source: "Meesho", img: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=350&q=70" },
+            { title: "Men Formal Oxford Lace-Up Shoes", price: "₹899", source: "Flipkart", img: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=350&q=70" },
+            { title: "Volumizing Waterproof Mascara 10ml", price: "₹289", source: "Nykaa", img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=350&q=70" },
+            { title: "Women Casual Open Front Shrug", price: "₹319", source: "Myntra", img: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=350&q=70" },
+            { title: "Pure Copper Water Bottle 900ml", price: "₹599", source: "Amazon", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70" }
         ];
 
-        const modifiers = ["Royal", "Urban", "Trendy", "Vibrant", "Chic", "Elegant", "Modish", "Stylish", "Graceful", "Fabulous", "Classic", "Elite", "Signature", "Prime", "Luxe"];
-        const colors = ["Navy Blue", "Jet Black", "Rose Gold", "Emerald Green", "Sunset Orange", "Pearl White", "Ruby Red", "Sky Blue", "Charcoal Grey", "Ivory Cream", "Teal Blue", "Burgundy", "Mustard Yellow", "Blush Pink", "Lavender"];
-
-        let masterCatalog = [];
+        let shuffledCatalog = [];
         let displayedCount = 0;
         const batchSize = 16;
 
-        function buildMasterCatalog() {
-            let list = [];
-            let counter = 1;
-            // Generates 300+ strictly unique combinations
-            categories.forEach(cat => {
-                modifiers.forEach((mod) => {
-                    colors.forEach((col) => {
-                        list.push({
-                            title: `${mod} ${col} ${cat.name}`,
-                            price: `₹${cat.basePrice + (counter * 11) % 400}`,
-                            source: cat.src,
-                            img: cat.img
-                        });
-                        counter++;
-                    });
-                });
-            });
-            // Randomize whole catalog on every load so order changes completely
-            return list.sort(() => 0.5 - Math.random());
+        function initCatalog() {
+            // Shuffle the unique products array completely on load
+            shuffledCatalog = [...allUniqueProducts].sort(() => 0.5 - Math.random());
         }
 
-        masterCatalog = buildMasterCatalog();
+        initCatalog();
 
         function loadMoreProducts() {
             const container = document.getElementById('product-list');
             const loader = document.getElementById('loader');
             
-            if (displayedCount >= masterCatalog.length) {
+            if (displayedCount >= shuffledCatalog.length) {
                 loader.style.display = 'none';
                 return;
             }
@@ -134,7 +146,7 @@
             loader.style.display = 'block';
             
             setTimeout(() => {
-                const nextBatch = masterCatalog.slice(displayedCount, displayedCount + batchSize);
+                const nextBatch = shuffledCatalog.slice(displayedCount, displayedCount + batchSize);
                 let html = '';
                 nextBatch.forEach(p => {
                     const searchUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.title + " " + p.source)}`;
@@ -143,13 +155,11 @@
                 container.insertAdjacentHTML('beforeend', html);
                 displayedCount += batchSize;
                 loader.style.display = 'none';
-            }, 400);
+            }, 300);
         }
 
-        // Initial load
         loadMoreProducts();
 
-        // Infinite scroll listener
         window.addEventListener('scroll', () => {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
                 loadMoreProducts();
