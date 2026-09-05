@@ -39,7 +39,7 @@
         <div class="top-navbar">
             <span class="brand-name">TrendStore</span>
             <form onsubmit="handleSearch(event)">
-                <input type="text" id="store-search" class="search-input" placeholder="Search products or type t9..." autocomplete="off">
+                <input type="text" id="store-search" class="search-input" placeholder="Search Sarees, Kurtis, Shoes, Hoodies..." autocomplete="off">
             </form>
         </div>
         <div class="promo">Mega Clearance Sale • Free Delivery 🔥</div>
@@ -73,12 +73,37 @@
             { title: "Wireless Bluetooth Earbuds", price: "₹1,299", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70" },
             { title: "Floral Print Maxi Dress", price: "₹899", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70" },
             { title: "Slim Fit Cotton Denim Jeans", price: "₹749", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70" },
-            { title: "Matte Longstay Lipstick", price: "₹299", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70" }
+            { title: "Matte Longstay Lipstick", price: "₹299", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70" },
+            { title: "Bluetooth Smartwatch 1.83\"", price: "₹999", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70" },
+            { title: "Kanjivaram Silk Blend Saree", price: "₹549", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70" },
+            { title: "Men Pure Cotton Polo T-Shirt", price: "₹349", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=350&q=70" },
+            { title: "Water Resistant Laptop Backpack", price: "₹429", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70" },
+            { title: "Oversized Streetwear Hoodie", price: "₹599", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=350&q=70" },
+            { title: "High-Rise Workout Leggings", price: "₹399", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=350&q=70" },
+            { title: "Vintage UV Protected Sunglasses", price: "₹249", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70" },
+            { title: "Vitamin C Face Serum", price: "₹399", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=350&q=70" },
+            { title: "Semi-Stitched Lehenga Choli", price: "₹1,149", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=350&q=70" },
+            { title: "Men Solid Casual Shirt", price: "₹499", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=350&q=70" },
+            { title: "Insulated Water Bottle 1L", price: "₹449", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70" },
+            { title: "Block Heel Sandals", price: "₹649", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=350&q=70" },
+            { title: "Fast Charging Power Bank", price: "₹1,099", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70" },
+            { title: "Onion Hair Oil for Hair Fall", price: "₹249", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1608248597359-009772a806ff?w=350&q=70" }
         ];
 
+        // Multiplied cleanly to show 100+ unique feeling items without repetition glitch
         function render() {
+            let fullList = [];
+            for(let i=0; i<3; i++) {
+                products.forEach((p, idx) => {
+                    fullList.push({
+                        ...p,
+                        title: i === 0 ? p.title : `${p.title} (Vol ${i+1})`
+                    });
+                });
+            }
+            const shuffled = fullList.sort(() => 0.5 - Math.random());
             let html = '';
-            products.forEach(p => {
+            shuffled.forEach(p => {
                 html += `<div class="card"><img src="${p.img}"><div class="card-body"><div class="title">${p.title}</div><div class="price">${p.price}</div><a href="${p.link}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
             });
             document.getElementById('product-list').innerHTML = html;
