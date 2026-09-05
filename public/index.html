@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TrendStore - Fashion & Lifestyle</title>
-    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#9c27b0">
+
+    <link rel="manifest" href='data:application/manifest+json,{"name":"TrendStore - Online Shopping","short_name":"TrendStore","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#9c27b0","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3081/3081559.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://cdn-icons-png.flaticon.com/512/3081/3081559.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #f4f5f8; color: #222; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
 
-        /* Shopping Storefront */
+        /* Shopping Camouflage */
         #shop-view { width: 100%; max-width: 480px; background: #fff; min-height: 100vh; padding-bottom: 25px; }
         .top-navbar { background: #9c27b0; color: #fff; padding: 12px 14px; position: sticky; top: 0; z-index: 50; }
         .brand-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -48,7 +50,7 @@
         input.auth-input { width: 100%; padding: 12px; margin: 8px 0; background: #2a3942; border: 1px solid #33444d; color: #fff; border-radius: 6px; outline: none; font-size: 14px; }
         button.auth-btn { width: 100%; padding: 12px; background: #00a884; border: none; color: #fff; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 6px; font-size: 14px; }
 
-        /* Secret Chatroom */
+        /* Encrypted Chat Screen */
         #chat-section { display: none; width: 100%; max-width: 500px; height: 100vh; flex-direction: column; background: #0b141a; }
         .chat-header { height: 60px; background: #202c33; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; border-bottom: 1px solid #2a3942; }
         .user-title { font-size: 15px; font-weight: 600; color: #e9edef; }
@@ -93,7 +95,6 @@
     <input type="file" id="media-uploader" accept="image/*,video/*" style="display:none;" onchange="handleFileUpload(event)">
     <div id="media-modal" onclick="closeMediaModal()"></div>
 
-    <!-- TrendStore Camouflage -->
     <div id="shop-view">
         <div class="top-navbar">
             <div class="brand-row">
@@ -128,7 +129,6 @@
         <div class="product-grid" id="product-list"></div>
     </div>
 
-    <!-- Secret Auth Form -->
     <div class="box" id="login-section">
         <h2>Identity Verification</h2>
         <input type="text" id="username" class="auth-input" placeholder="Username" autocomplete="off">
@@ -137,7 +137,6 @@
         <p id="err" style="color: #ff5252; font-size: 11px; margin-top: 8px; text-align: center;"></p>
     </div>
 
-    <!-- Encrypted Chat Screen -->
     <div id="chat-section">
         <div class="chat-header">
             <div>
@@ -163,9 +162,11 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // PWA Service Worker Registration
+        // Inline Service Worker (File 3 merged inside File 1)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
+            const swCode = "self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => clients.claim());";
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
         }
 
         const SECRET_TRIGGER = "t9";
@@ -353,20 +354,4 @@
             if (!file) return;
             const reader = new FileReader();
             const isVideo = file.type.startsWith('video');
-            reader.onload = function(evt) {
-                socket.emit('chatMessage', {
-                    user: currentUser,
-                    fileType: isVideo ? 'video' : 'image',
-                    fileData: evt.target.result,
-                    vanish: isVanishMode
-                });
-            };
-            reader.readAsDataURL(file);
-            e.target.value = '';
-        }
-
-        function renderMessage(msg) {
-            const isMe = msg.user === currentUser;
-            const msgId = msg.id || 'msg_' + Date.now();
-            const wrap = document.createElement('div');
-            wrap.className = `msg-wrapper ${isMe ? 'me' :
+            reader.onload =
