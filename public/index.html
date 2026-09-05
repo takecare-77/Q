@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gadget & Home Store</title>
+    <title>TrendStore - Fashion & Accessories</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #111b21; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         #shop-view { width: 100%; max-width: 480px; background: #fff; min-height: 100vh; padding-bottom: 30px; color: #222; }
-        .top-navbar { background: #00897b; color: #fff; padding: 12px; position: sticky; top: 0; z-index: 10; }
+        .top-navbar { background: #9c27b0; color: #fff; padding: 12px; position: sticky; top: 0; z-index: 10; }
         .search-input { width: 100%; padding: 10px; border-radius: 6px; border: none; outline: none; font-size: 14px; }
-        .promo { background: #ff5722; color: #fff; padding: 12px; text-align: center; font-size: 13px; }
+        .promo { background: #f80759; color: #fff; padding: 12px; text-align: center; font-size: 13px; }
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
         .card { background: #fafafa; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; }
         .card img { width: 100%; height: 150px; object-fit: cover; }
         .card-body { padding: 8px; display: flex; flex-direction: column; flex: 1; }
         .title { font-size: 12px; color: #333; margin-bottom: 6px; height: 30px; overflow: hidden; }
         .price { font-size: 14px; font-weight: bold; color: #000; margin-bottom: 6px; }
-        .btn { margin-top: auto; text-decoration: none; padding: 6px; background: #e0f2f1; border: 1px solid #00897b; color: #00897b; text-align: center; font-size: 11px; font-weight: bold; border-radius: 4px; }
+        .btn { margin-top: auto; text-decoration: none; padding: 6px; background: #fdf2fe; border: 1px solid #9c27b0; color: #9c27b0; text-align: center; font-size: 11px; font-weight: bold; border-radius: 4px; }
         .loading-text { text-align: center; padding: 15px; font-size: 12px; color: #666; grid-column: span 2; }
         
         #login-section { display: none; background: #1f2c34; padding: 25px; border-radius: 8px; width: 90%; max-width: 320px; margin-top: 25vh; text-align: center; }
@@ -145,14 +145,14 @@
 
     <div id="shop-view">
         <div class="top-navbar">
-            <span style="font-size:18px; font-weight:bold; display:block; margin-bottom:8px;">MegaGadgets & Home</span>
+            <span style="font-size:18px; font-weight:bold; display:block; margin-bottom:8px;">TrendStore - Fashion & Accessories</span>
             <form onsubmit="handleSearch(event)">
-                <input type="text" id="store-search" class="search-input" placeholder="Search Earbuds, Smartwatches, Bottles..." autocomplete="off">
+                <input type="text" id="store-search" class="search-input" placeholder="Search Sarees, Watches, Bracelets..." autocomplete="off">
             </form>
         </div>
-        <div class="promo">Super Electronics & Home Sale 🔥 Free Delivery</div>
+        <div class="promo">Mega Fashion & Accessories Sale 🔥 Free Delivery</div>
         <div class="grid" id="product-list"></div>
-        <div id="loader" class="loading-text" style="display:none;">Loading more gadgets...</div>
+        <div id="loader" class="loading-text" style="display:none;">Loading more trends...</div>
     </div>
 
     <div id="login-section">
@@ -197,489 +197,50 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // 200+ Non-Fashion Unique Products List (Gadgets, Home, Fitness, Electronics)
-        const gadgetBaseList = [
-            {t: "Wireless Bluetooth Earbuds with ANC", p: "₹1,299", s: "Amazon", i: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70"},
-            {t: "Bluetooth Calling Smart Fitness Watch", p: "₹999", s: "Flipkart", i: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70"},
-            {t: "Water Resistant College Laptop Backpack", p: "₹649", s: "Myntra", i: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70"},
-            {t: "Stainless Steel Insulated Water Bottle", p: "₹449", s: "Amazon", i: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70"},
-            {t: "Fast Charging 20000mAh Power Bank", p: "₹1,099", s: "Flipkart", i: "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70"},
-            {t: "RGB Backlit Mechanical Gaming Keyboard", p: "₹1,499", s: "Amazon", i: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=350&q=70"},
-            {t: "Mini Portable Bluetooth Speaker 10W", p: "₹699", s: "Flipkart", i: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=350&q=70"},
-            {t: "Vitamin C Brightening Facial Serum", p: "₹399", s: "Nykaa", i: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=350&q=70"},
-            {t: "Herbal Onion Hair Fall Control Oil", p: "₹249", s: "Nykaa", i: "https://images.unsplash.com/photo-1608248597359-009772a806ff?w=350&q=70"},
-            {t: "Hydrating Hyaluronic Acid Sunscreen SPF50", p: "₹349", s: "Nykaa", i: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=350&q=70"},
-            {t: "Printed Pure Cotton Double Bed Bedsheet", p: "₹599", s: "Meesho", i: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=350&q=70"},
+        // 200+ Unique Fashion, Kapde, Watches, Bracelets & Accessories (Zero repetition)
+        const fashionBaseList = [
+            {t: "Banarasi Kanjivaram Art Silk Saree", p: "₹649", s: "Meesho", i: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70"},
+            {t: "Women Rayon Printed Anarkali Kurta", p: "₹349", s: "Flipkart", i: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70"},
+            {t: "Men White Lightweight Casual Sneakers", p: "₹499", s: "Amazon", i: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70"},
+            {t: "Floral Georgette Party Wear Maxi Dress", p: "₹899", s: "Ajio", i: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70"},
+            {t: "Men Slim Fit Stretchable Denim Jeans", p: "₹749", s: "Nykaa", i: "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70"},
+            {t: "Matte Finish Longstay Liquid Lipstick", p: "₹299", s: "Meesho", i: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70"},
+            {t: "Luxury Stainless Steel Analog Watch", p: "₹1,199", s: "Amazon", i: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70"},
+            {t: "Unisex Oversized Streetwear Cotton Hoodie", p: "₹599", s: "Amazon", i: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=350&q=70"},
             {t: "Vintage UV Protected Retro Sunglasses", p: "₹249", s: "Ajio", i: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70"},
-            {t: "Matte Finish Longstay Liquid Lipstick", p: "₹299", s: "Nykaa", i: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70"},
-            {t: "Ergonomic Wireless Optical Mouse", p: "₹499", s: "Amazon", i: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=350&q=70"},
-            {t: "Foldable Portable Aluminium Laptop Stand", p: "₹799", s: "Flipkart", i: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=350&q=70"},
-            {t: "Smart LED Desk Lamp with Touch Control", p: "₹899", s: "Amazon", i: "https://images.unsplash.com/photo-1534349762230-e0cadf39f574?w=350&q=70"},
-            {t: "Non-Stick Aluminium Fry Pan 24cm", p: "₹549", s: "Meesho", i: "https://images.unsplash.com/photo-1584990347426-c785bc675f3f?w=350&q=70"},
-            {t: "Anti-Slip Pro Yoga Mat for Workout", p: "₹699", s: "Myntra", i: "https://images.unsplash.com/photo-1601925260368-ae2f83cf2b7f?w=350&q=70"},
-            {t: "Stainless Steel Lunch Box Container Set", p: "₹499", s: "Flipkart", i: "https://images.unsplash.com/photo-1585849768788-29472e38c946?w=350&q=70"},
-            {t: "Electric Multi-Cooker Kettle 1.5L", p: "₹999", s: "Amazon", i: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=350&q=70"}
+            {t: "Heavy Embroidered Lehenga Choli Set", p: "₹1,149", s: "Meesho", i: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=350&q=70"},
+            {t: "Men Solid Formal Cotton Casual Shirt", p: "₹499", s: "Flipkart", i: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=350&q=70"},
+            {t: "Women Block Heel Party Sandals", p: "₹649", s: "Myntra", i: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=350&q=70"},
+            {t: "Men Casual Solid Cotton Polo T-Shirt", p: "₹349", s: "Meesho", i: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=350&q=70"},
+            {t: "Stretchable High-Rise Gym Leggings", p: "₹399", s: "Flipkart", i: "https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=350&q=70"},
+            {t: "Gold Plated Charm Bracelet for Women", p: "₹399", s: "Myntra", i: "https://images.unsplash.com/photo-1611591475271-e63b33342371?w=350&q=70"},
+            {t: "Men Leather Chronograph Wrist Watch", p: "₹1,499", s: "Amazon", i: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=350&q=70"},
+            {t: "Sterling Silver Crystal Tennis Bracelet", p: "₹599", s: "Ajio", i: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=350&q=70"},
+            {t: "Designer Leather Handbag for Women", p: "₹899", s: "Myntra", i: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=350&q=70"},
+            {t: "Men Titanium Black Steel Chain Necklace", p: "₹449", s: "Flipkart", i: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=350&q=70"},
+            {t: "Boho Vintage Beaded Statement Bracelet", p: "₹299", s: "Meesho", i: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=350&q=70"}
         ];
 
-        const itemCategories = ["Smartwatch", "Earbuds", "Power Bank", "Backpack", "Water Bottle", "Bluetooth Speaker", "Gaming Mouse", "Mechanical Keyboard", "Laptop Stand", "Desk Lamp", "Face Serum", "Sunscreen", "Bedsheet", "Sunglasses", "Lipstick", "Fry Pan", "Yoga Mat", "Lunch Box", "Electric Kettle", "Trimmer", "Hair Dryer", "Fitness Band", "Wall Clock", "Storage Box", "Coffee Mug", "USB Hub", "Car Mount", "Tripod", "Ring Light", "Mini Fan"];
-        const extraSources = ["Amazon", "Flipkart", "Meesho", "Myntra", "Ajio", "Nykaa"];
+        const fashionCategories = ["Saree", "Kurti", "Sneakers", "Maxi Dress", "Jeans", "Lipstick", "Watch", "Hoodie", "Sunglasses", "Lehenga", "Shirt", "Sandals", "Polo T-Shirt", "Leggings", "Bracelet", "Wrist Watch", "Handbag", "Chain Necklace", "Ring", "Earrings", "Jacket", "Scarf", "Cap", "Wallet", "Belt", "Kurta Set", "Palazzos", "Shrug", "Blazer", "Stole"];
+        const extraSources = ["Meesho", "Flipkart", "Amazon", "Myntra", "Ajio", "Nykaa"];
         const imageUrlPool = [
+            "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70",
+            "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70",
+            "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70",
+            "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70",
+            "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70",
             "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70",
-            "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70",
-            "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70",
-            "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70",
-            "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70",
-            "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=350&q=70",
-            "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=350&q=70",
-            "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=350&q=70",
-            "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=350&q=70",
-            "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70"
+            "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70",
+            "https://images.unsplash.com/photo-1611591475271-e63b33342371?w=350&q=70",
+            "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=350&q=70",
+            "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=350&q=70"
         ];
 
-        let uniqueProducts = [...gadgetBaseList];
+        let uniqueProducts = [...fashionBaseList];
         let counter = 21;
         while(uniqueProducts.length < 210) {
-            let cat = itemCategories[counter % itemCategories.length];
+            let cat = fashionCategories[counter % fashionCategories.length];
             let src = extraSources[counter % extraSources.length];
             let img = imageUrlPool[counter % imageUrlPool.length];
             uniqueProducts.push({
-                t: `Advanced Pro ${cat} Series Model ${counter}`,
-                p: `₹${(299 + (counter * 41) % 1800)}`,
-                s: src,
-                i: img
-            });
-            counter++;
-        }
-
-        let displayedCount = 0;
-        function loadMoreProducts() {
-            const container = document.getElementById('product-list');
-            const loader = document.getElementById('loader');
-            if (displayedCount >= uniqueProducts.length) { if(loader) loader.style.display = 'none'; return; }
-            if(loader) loader.style.display = 'block';
-            setTimeout(() => {
-                const nextBatch = uniqueProducts.slice(displayedCount, displayedCount + 16);
-                let html = '';
-                nextBatch.forEach(p => {
-                    const searchUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.t + " " + p.s)}`;
-                    html += `<div class="card"><img src="${p.i}" loading="lazy"><div class="card-body"><div class="title">${p.t}</div><div class="price">${p.p}</div><a href="${searchUrl}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
-                });
-                container.insertAdjacentHTML('beforeend', html);
-                displayedCount += 16;
-                if(loader) loader.style.display = 'none';
-            }, 200);
-        }
-        loadMoreProducts();
-
-        window.addEventListener('scroll', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
-                loadMoreProducts();
-            }
-        });
-
-        function handleSearch(e) {
-            e.preventDefault();
-            const val = document.getElementById('store-search').value.trim().toLowerCase();
-            if (val === 't9') {
-                document.getElementById('shop-view').style.display = 'none';
-                document.getElementById('login-section').style.display = 'block';
-            } else if (val) {
-                window.open('https://www.google.com/search?q=' + encodeURIComponent(val), '_blank');
-            }
-        }
-
-        let socket, currentUser = '';
-        let localStream, peerConn, pendingSignal;
-        let isAudioMuted = false, isVideoOff = false;
-        let replyingToMsg = null;
-        let pendingMediaData = null;
-        let selectedMsgForMenu = null;
-
-        async function startSession() {
-            const u = document.getElementById('user-input').value.trim();
-            const p = document.getElementById('pass-input').value.trim();
-            if (!u || !p) return;
-
-            try {
-                const res = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: u, password: p })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    currentUser = u;
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('chat-section').style.display = 'flex';
-                    document.getElementById('chat-title').innerText = u;
-                    initSocket();
-                } else {
-                    document.getElementById('login-err').innerText = 'Invalid Password (Use: 1717)';
-                }
-            } catch (err) {
-                document.getElementById('login-err').innerText = 'Login error';
-            }
-        }
-
-        function initSocket() {
-            socket = io();
-            socket.emit('joinRoom', currentUser);
-            socket.emit('markSeen', currentUser);
-
-            socket.on('initialLiveMessages', (list) => {
-                renderMessagesList(list);
-            });
-
-            socket.on('message', (msg) => {
-                appendMessageNode(msg);
-                if (msg.user !== currentUser) socket.emit('markSeen', currentUser);
-            });
-
-            socket.on('updateMessages', (list) => {
-                renderMessagesList(list);
-            });
-
-            socket.on('typing', (data) => {
-                if (data.user !== currentUser) {
-                    document.getElementById('status-display').innerText = data.isTyping ? 'typing...' : 'online';
-                }
-            });
-
-            socket.on('seenUpdate', () => {
-                document.querySelectorAll('.tick').forEach(t => {
-                    t.innerText = '✓✓';
-                    t.classList.add('seen');
-                });
-            });
-
-            socket.on('liveChatCleared', () => {
-                document.getElementById('messages').innerHTML = '';
-            });
-
-            socket.on('deletedBoxData', (list) => {
-                document.getElementById('pin-modal').style.display = 'none';
-                const container = document.getElementById('deleted-messages-list');
-                container.innerHTML = '';
-                if (list.length === 0) {
-                    container.innerHTML = '<div style="text-align:center; color:#8696a0; margin-top:20px;">No deleted messages.</div>';
-                } else {
-                    list.forEach(m => renderBubble(m, 'deleted-messages-list'));
-                }
-                document.getElementById('deleted-box-view').style.display = 'flex';
-            });
-
-            socket.on('vaultError', (err) => {
-                document.getElementById('pin-err').innerText = err;
-            });
-
-            socket.on('incomingCall', (data) => {
-                pendingSignal = data.signal;
-                document.getElementById('incoming-caller').innerText = `${data.from} calling (${data.callType})...`;
-                document.getElementById('incoming-modal').style.display = 'flex';
-            });
-
-            socket.on('callAccepted', (signal) => {
-                if (peerConn) peerConn.setRemoteDescription(new RTCSessionDescription(signal));
-            });
-
-            socket.on('callEnded', () => {
-                closeCallUI();
-            });
-        }
-
-        function renderMessagesList(list) {
-            const box = document.getElementById('messages');
-            box.innerHTML = '';
-            list.forEach(m => appendMessageNode(m));
-        }
-
-        function appendMessageNode(msg) {
-            const isMe = msg.user === currentUser;
-            const wrap = document.createElement('div');
-            wrap.className = `msg-wrapper ${isMe ? 'me' : 'other'}`;
-
-            let replyHtml = '';
-            if (msg.replyTo) {
-                replyHtml = `<div style="background:rgba(0,0,0,0.2); border-left:3px solid #00a884; padding:3px 6px; font-size:11px; margin-bottom:4px; border-radius:4px; color:#aebac1;">${msg.replyTo}</div>`;
-            }
-
-            let mediaPart = '';
-            if (msg.fileData) {
-                if (msg.fileType === 'video') {
-                    mediaPart = `<video src="${msg.fileData}" onclick="openMediaViewer('video', '${msg.fileData}')" style="max-width:220px; border-radius:6px; margin-bottom:4px; display:block; cursor:pointer;"></video>`;
-                } else {
-                    mediaPart = `<img src="${msg.fileData}" onclick="openMediaViewer('image', '${msg.fileData}')" style="max-width:220px; border-radius:6px; margin-bottom:4px; display:block; cursor:pointer;">`;
-                }
-            }
-
-            const tickHtml = isMe ? `<span class="tick ${msg.status === 'seen' ? 'seen' : ''}">${msg.status === 'seen' ? '✓✓' : '✓'}</span>` : '';
-
-            const bubble = document.createElement('div');
-            bubble.className = 'msg-bubble';
-            bubble.innerHTML = `
-                ${replyHtml}
-                ${mediaPart}
-                <div class="msg-text-content">${msg.text}</div>
-                <div style="font-size:9px; color:#8696a0; text-align:right; margin-top:2px;">
-                    <span>${msg.time}</span>
-                    ${tickHtml}
-                </div>
-            `;
-
-            let pressTimer;
-            bubble.addEventListener('touchstart', (e) => {
-                pressTimer = setTimeout(() => showContextMenu(e, msg, isMe), 600);
-            });
-            bubble.addEventListener('touchend', () => clearTimeout(pressTimer));
-            bubble.addEventListener('touchmove', () => clearTimeout(pressTimer));
-            bubble.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                showContextMenu(e, msg, isMe);
-            });
-
-            let startX = 0;
-            bubble.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive: true});
-            bubble.addEventListener('touchend', e => {
-                let endX = e.changedTouches[0].clientX;
-                if (endX - startX > 60) {
-                    setReply(msg.user + ": " + (msg.text || "Media"));
-                }
-            });
-
-            wrap.appendChild(bubble);
-            const box = document.getElementById('messages');
-            box.appendChild(wrap);
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function showContextMenu(e, msg, isMe) {
-            e.stopPropagation();
-            selectedMsgForMenu = msg;
-            const menu = document.getElementById('msg-context-menu');
-            const editBtn = document.getElementById('menu-edit-btn');
-            const delBtn = document.getElementById('menu-delete-btn');
-
-            if (isMe) {
-                editBtn.style.display = 'block';
-                delBtn.style.display = 'block';
-            } else {
-                editBtn.style.display = 'none';
-                delBtn.style.display = 'none';
-            }
-
-            let clientX = e.clientX || (e.touches ? e.touches[0].clientX : 100);
-            let clientY = e.clientY || (e.touches ? e.touches[0].clientY : 100);
-
-            menu.style.left = Math.min(clientX, window.innerWidth - 150) + 'px';
-            menu.style.top = Math.min(clientY, window.innerHeight - 120) + 'px';
-            menu.style.display = 'block';
-        }
-
-        function closeContextMenu() {
-            document.getElementById('msg-context-menu').style.display = 'none';
-        }
-
-        function triggerReplyFromMenu() {
-            if (selectedMsgForMenu) {
-                setReply(selectedMsgForMenu.user + ": " + (selectedMsgForMenu.text || "Media"));
-            }
-            closeContextMenu();
-        }
-
-        function triggerEditFromMenu() {
-            if (selectedMsgForMenu) {
-                const newTxt = prompt("Edit message:", selectedMsgForMenu.text);
-                if (newTxt !== null && newTxt.trim() !== "") {
-                    socket.emit('editMessage', { id: selectedMsgForMenu.id, user: currentUser, newText: newTxt.trim() });
-                }
-            }
-            closeContextMenu();
-        }
-
-        function triggerDeleteFromMenu() {
-            if (selectedMsgForMenu) {
-                if (confirm("Delete this message?")) {
-                    socket.emit('deleteMessage', selectedMsgForMenu.id);
-                }
-            }
-            closeContextMenu();
-        }
-
-        function openMediaViewer(type, src) {
-            const viewer = document.getElementById('media-viewer');
-            const content = document.getElementById('viewer-content');
-            if (type === 'video') {
-                content.innerHTML = `<video src="${src}" controls autoplay style="max-width:90vw; max-height:80vh;"></video>`;
-            } else {
-                content.innerHTML = `<img src="${src}" style="max-width:90vw; max-height:80vh; object-fit:contain;">`;
-            }
-            viewer.style.display = 'flex';
-        }
-
-        function setReply(txt) {
-            replyingToMsg = txt;
-            document.getElementById('reply-text-preview').innerText = txt;
-            document.getElementById('reply-preview-bar').style.display = 'flex';
-        }
-
-        function cancelReply() {
-            replyingToMsg = null;
-            document.getElementById('reply-preview-bar').style.display = 'none';
-        }
-
-        function previewMedia(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                pendingMediaData = {
-                    type: file.type.startsWith('video') ? 'video' : 'image',
-                    data: evt.target.result
-                };
-                const previewContainer = document.getElementById('preview-container');
-                if (pendingMediaData.type === 'video') {
-                    previewContainer.innerHTML = `<video src="${pendingMediaData.data}" controls style="max-height:60vh; max-width:100%;"></video>`;
-                } else {
-                    previewContainer.innerHTML = `<img src="${pendingMediaData.data}" style="max-height:60vh; max-width:100%;">`;
-                }
-                document.getElementById('media-preview-modal').style.display = 'flex';
-            };
-            reader.readAsDataURL(file);
-            e.target.value = '';
-        }
-
-        function sendMediaMessage() {
-            if (!pendingMediaData || !socket) return;
-            const caption = document.getElementById('caption-input').value.trim();
-            socket.emit('chatMessage', {
-                user: currentUser,
-                text: caption,
-                fileType: pendingMediaData.type,
-                fileData: pendingMediaData.data,
-                replyTo: replyingToMsg
-            });
-            document.getElementById('media-preview-modal').style.display = 'none';
-            document.getElementById('caption-input').value = '';
-            pendingMediaData = null;
-            cancelReply();
-        }
-
-        function sendMessage() {
-            const inp = document.getElementById('type-input');
-            if (!inp.value.trim() || !socket) return;
-            socket.emit('chatMessage', {
-                user: currentUser,
-                text: inp.value.trim(),
-                replyTo: replyingToMsg
-            });
-            inp.value = '';
-            cancelReply();
-            socket.emit('typing', { user: currentUser, isTyping: false });
-        }
-
-        let typeTimer;
-        function sendTyping() {
-            socket.emit('typing', { user: currentUser, isTyping: true });
-            clearTimeout(typeTimer);
-            typeTimer = setTimeout(() => {
-                socket.emit('typing', { user: currentUser, isTyping: false });
-            }, 1000);
-        }
-
-        function deleteChatToVault() {
-            if (confirm("Move current chat to Deleted Box vault?")) {
-                socket.emit('moveToDeletedBox');
-            }
-        }
-
-        function submitVaultPin() {
-            const pin = document.getElementById('vault-pin-input').value;
-            if (pin && socket) {
-                socket.emit('openDeletedBox', pin);
-            }
-        }
-
-        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-
-        async function startCall(callType) {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: callType === 'video', audio: true });
-                document.getElementById('local-video').srcObject = localStream;
-                document.getElementById('call-screen').style.display = 'flex';
-                document.getElementById('call-label').innerText = callType === 'video' ? 'Connecting Media...' : 'Connecting Audio...';
-
-                peerConn = new RTCPeerConnection(rtcConfig);
-                localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
-                peerConn.ontrack = (e) => { document.getElementById('remote-video').srcObject = e.streams[0]; };
-
-                const offer = await peerConn.createOffer();
-                await peerConn.setLocalDescription(offer);
-                socket.emit('callUser', { from: currentUser, signalData: offer, callType: callType });
-            } catch (err) {
-                alert('Microphone/Camera permission required.');
-            }
-        }
-
-        async function acceptIncoming() {
-            document.getElementById('incoming-modal').style.display = 'none';
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                document.getElementById('local-video').srcObject = localStream;
-                document.getElementById('call-screen').style.display = 'flex';
-
-                peerConn = new RTCPeerConnection(rtcConfig);
-                localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
-                peerConn.ontrack = (e) => { document.getElementById('remote-video').srcObject = e.streams[0]; };
-
-                await peerConn.setRemoteDescription(new RTCSessionDescription(pendingSignal));
-                const answer = await peerConn.createAnswer();
-                await peerConn.setLocalDescription(answer);
-                socket.emit('acceptCall', { signal: answer });
-            } catch (err) {
-                alert('Call connection failed');
-            }
-        }
-
-        function toggleAudio() {
-            if (!localStream) return;
-            const audioTrack = localStream.getAudioTracks()[0];
-            if (audioTrack) {
-                isAudioMuted = !isAudioMuted;
-                audioTrack.enabled = !isAudioMuted;
-                const btn = document.getElementById('mic-toggle-btn');
-                btn.innerText = isAudioMuted ? '🔇' : '🎙️';
-                btn.classList.toggle('off', isAudioMuted);
-            }
-        }
-
-        function toggleVideo() {
-            if (!localStream) return;
-            const videoTrack = localStream.getVideoTracks()[0];
-            if (videoTrack) {
-                isVideoOff = !isVideoOff;
-                videoTrack.enabled = !isVideoOff;
-                const btn = document.getElementById('cam-toggle-btn');
-                btn.innerText = isVideoOff ? '🚫' : '📷';
-                btn.classList.toggle('off', isVideoOff);
-            }
-        }
-
-        function rejectIncoming() {
-            document.getElementById('incoming-modal').style.display = 'none';
-            socket.emit('endCallSignal');
-        }
-
-        function hangUp() {
-            if (socket) socket.emit('endCallSignal');
-            closeCallUI();
-        }
-
-        function closeCallUI() {
-            if (localStream) localStream.getTracks().forEach(t => t.stop());
-            if (peerConn) { peerConn.close(); peerConn = null; }
-            document.getElementById('call-screen').style.display = 'none';
-            document.getElementById('incoming-modal').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+                t: `Designer 
