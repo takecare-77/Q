@@ -18,6 +18,7 @@
         .title { font-size: 12px; color: #333; margin-bottom: 6px; height: 30px; overflow: hidden; }
         .price { font-size: 14px; font-weight: bold; color: #000; margin-bottom: 6px; }
         .btn { margin-top: auto; text-decoration: none; padding: 6px; background: #fdf2fe; border: 1px solid #9c27b0; color: #9c27b0; text-align: center; font-size: 11px; font-weight: bold; border-radius: 4px; }
+        .loading-text { text-align: center; padding: 15px; font-size: 12px; color: #666; grid-column: span 2; }
         
         #login-section { display: none; background: #1f2c34; padding: 25px; border-radius: 8px; width: 90%; max-width: 320px; margin-top: 25vh; text-align: center; }
         .auth-input { width: 100%; padding: 10px; margin: 8px 0; background: #2a3942; border: 1px solid #33444d; color: #fff; border-radius: 4px; outline: none; }
@@ -32,15 +33,28 @@
         .wa-btn { background: none; border: none; font-size: 16px; color: #aebac1; cursor: pointer; padding: 6px; }
 
         #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background-image: radial-gradient(#182229 10%, transparent 11%); background-size: 18px 18px; }
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 78%; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 78%; position: relative; }
         .msg-wrapper.me { align-self: flex-end; }
         .msg-wrapper.other { align-self: flex-start; }
-        .msg-bubble { padding: 6px 9px 4px 9px; border-radius: 8px; font-size: 14.2px; line-height: 1.35; word-break: break-word; background: #202c33; color: #e9edef; }
+        .msg-bubble { padding: 6px 9px 4px 9px; border-radius: 8px; font-size: 14.2px; line-height: 1.35; word-break: break-word; background: #202c33; color: #e9edef; position: relative; cursor: pointer; }
         .me .msg-bubble { background: #005c4b; }
         .tick { font-size: 12px; color: #8696a0; margin-left: 3px; }
         .tick.seen { color: #53bdeb; }
 
-        .chat-footer { padding: 8px; background: #202c33; display: flex; align-items: center; gap: 6px; }
+        /* Long press Context Menu */
+        #msg-context-menu { display: none; position: fixed; background: #233138; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 400; overflow: hidden; width: 140px; }
+        .menu-item { padding: 10px 14px; font-size: 13px; color: #e9edef; cursor: pointer; border-bottom: 1px solid #2a3942; }
+        .menu-item:hover { background: #182229; }
+
+        /* Media Fullscreen Viewer */
+        #media-viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; align-items: center; justify-content: center; flex-direction: column; }
+        #viewer-content { max-width: 90vw; max-height: 80vh; border-radius: 8px; }
+
+        #reply-preview-bar { display: none; background: #202c33; padding: 6px 12px; border-left: 4px solid #00a884; font-size: 12px; color: #e9edef; align-items: center; justify-content: space-between; }
+        #media-preview-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 300; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+
+        .chat-footer { padding: 8px; background: #202c33; display: flex; flex-direction: column; gap: 4px; }
+        .chat-footer-row { display: flex; align-items: center; gap: 6px; width: 100%; }
         .wa-input-pill { flex: 1; background: #2a3942; border-radius: 24px; display: flex; align-items: center; padding: 4px 12px; }
         .wa-input-pill input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 15px; padding: 6px 0; }
         .send-round-btn { width: 40px; height: 40px; background: #00a884; border-radius: 50%; border: none; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
@@ -62,9 +76,33 @@
         #incoming-modal { top: 20px; bottom: auto; width: 90%; max-width: 400px; margin: 0 auto; background: #202c33; border-radius: 12px; padding: 14px; z-index: 250; box-shadow: 0 5px 20px rgba(0,0,0,0.6); align-items: center; justify-content: space-between; display: none; }
     </style>
 </head>
-<body>
+<body onclick="closeContextMenu()">
 
-    <input type="file" id="media-input" accept="image/*" style="display:none;" onchange="uploadImage(event)">
+    <!-- Context Menu for Edit / Delete -->
+    <div id="msg-context-menu">
+        <div class="menu-item" id="menu-reply-btn" onclick="triggerReplyFromMenu()">Reply</div>
+        <div class="menu-item" id="menu-edit-btn" onclick="triggerEditFromMenu()" style="display:none;">Edit</div>
+        <div class="menu-item" id="menu-delete-btn" onclick="triggerDeleteFromMenu()" style="display:none; color:#ff5252;">Delete</div>
+    </div>
+
+    <!-- Media Fullscreen Viewer Modal -->
+    <div id="media-viewer" onclick="this.style.display='none'">
+        <div id="viewer-wrapper" onclick="event.stopPropagation()" style="position:relative;">
+            <button onclick="document.getElementById('media-viewer').style.display='none'" style="position:absolute; top:-35px; right:0; background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">✕</button>
+            <div id="viewer-content"></div>
+        </div>
+    </div>
+
+    <input type="file" id="media-input" accept="image/*,video/*" style="display:none;" onchange="previewMedia(event)">
+
+    <div id="media-preview-modal">
+        <div id="preview-container" style="max-width:100%; max-height:70vh; margin-bottom:15px; display:flex; justify-content:center;"></div>
+        <input type="text" id="caption-input" class="auth-input" placeholder="Add a caption..." style="max-width:300px;">
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button onclick="sendMediaMessage()" style="background:#00a884; border:none; padding:8px 18px; color:#fff; border-radius:6px; font-weight:bold; cursor:pointer;">Send</button>
+            <button onclick="document.getElementById('media-preview-modal').style.display='none'" style="background:#ea0038; border:none; padding:8px 18px; color:#fff; border-radius:6px; font-weight:bold; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
 
     <div id="incoming-modal">
         <div>
@@ -118,6 +156,7 @@
         </div>
         <div class="promo">Mega Clearance Sale • Free Delivery 🔥</div>
         <div class="grid" id="product-list"></div>
+        <div id="loader" class="loading-text" style="display:none;">Loading more trends...</div>
     </div>
 
     <div id="login-section">
@@ -146,34 +185,75 @@
         <div id="messages"></div>
 
         <div class="chat-footer">
-            <div class="wa-input-pill">
-                <button class="wa-btn" onclick="document.getElementById('media-input').click()" style="padding:0 4px;">📎</button>
-                <input type="text" id="type-input" placeholder="Message" oninput="sendTyping()" onkeypress="if(event.key==='Enter') sendMessage()">
+            <div id="reply-preview-bar">
+                <span id="reply-text-preview">Replying to message</span>
+                <span onclick="cancelReply()" style="cursor:pointer; font-weight:bold;">✕</span>
             </div>
-            <button class="send-round-btn" onclick="sendMessage()">➤</button>
+            <div class="chat-footer-row">
+                <div class="wa-input-pill">
+                    <button class="wa-btn" onclick="document.getElementById('media-input').click()" style="padding:0 4px;">📎</button>
+                    <input type="text" id="type-input" placeholder="Message" oninput="sendTyping()" onkeypress="if(event.key==='Enter') sendMessage()">
+                </div>
+                <button class="send-round-btn" onclick="sendMessage()">➤</button>
+            </div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const products = [
-            { title: "Women Printed Anarkali Kurta", price: "₹349", source: "Meesho", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70" },
-            { title: "Men White Casual Sneakers", price: "₹499", source: "Flipkart", img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70" },
-            { title: "Wireless Bluetooth Earbuds", price: "₹1,299", source: "Amazon", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70" },
-            { title: "Floral Print Maxi Dress", price: "₹899", source: "Myntra", img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70" },
-            { title: "Slim Fit Cotton Denim Jeans", price: "₹749", source: "Ajio", img: "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70" },
-            { title: "Matte Longstay Lipstick", price: "₹299", source: "Nykaa", img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70" }
+        const categories = ["Saree", "Kurti", "Sneakers", "Earbuds", "Dress", "Jeans", "Lipstick", "Smartwatch", "Hoodie", "Backpack", "Sunglasses", "Serum", "Lehenga", "Shirt", "Bottle", "Sandals", "Power Bank", "Hair Oil", "Jubba", "Trackpants", "Keyboard", "Handbag", "Running Shoes", "Sunscreen", "Bedsheet", "Cargo", "Speaker", "Choker"];
+        const sources = ["Meesho", "Flipkart", "Amazon", "Myntra", "Ajio", "Nykaa"];
+        const imagesList = [
+            "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70",
+            "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70",
+            "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70",
+            "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70",
+            "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70",
+            "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70",
+            "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70",
+            "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70",
+            "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=350&q=70",
+            "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70"
         ];
 
-        function render() {
-            let html = '';
-            products.forEach(p => {
-                const searchUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.title + " " + p.source)}`;
-                html += `<div class="card"><img src="${p.img}"><div class="card-body"><div class="title">${p.title}</div><div class="price">${p.price}</div><a href="${searchUrl}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
+        let allProducts = [];
+        for (let i = 1; i <= 210; i++) {
+            let cat = categories[i % categories.length];
+            let src = sources[i % sources.length];
+            let img = imagesList[i % imagesList.length];
+            allProducts.push({
+                title: `Trending Stylish ${cat} Model ${i}`,
+                price: `₹${(199 + (i * 37) % 1200)}`,
+                source: src,
+                img: img
             });
-            document.getElementById('product-list').innerHTML = html;
         }
-        render();
+
+        let displayedCount = 0;
+        function loadMoreProducts() {
+            const container = document.getElementById('product-list');
+            const loader = document.getElementById('loader');
+            if (displayedCount >= allProducts.length) { if(loader) loader.style.display = 'none'; return; }
+            if(loader) loader.style.display = 'block';
+            setTimeout(() => {
+                const nextBatch = allProducts.slice(displayedCount, displayedCount + 14);
+                let html = '';
+                nextBatch.forEach(p => {
+                    const searchUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.title + " " + p.source)}`;
+                    html += `<div class="card"><img src="${p.img}" loading="lazy"><div class="card-body"><div class="title">${p.title}</div><div class="price">${p.price}</div><a href="${searchUrl}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
+                });
+                container.insertAdjacentHTML('beforeend', html);
+                displayedCount += 14;
+                if(loader) loader.style.display = 'none';
+            }, 200);
+        }
+        loadMoreProducts();
+
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+                loadMoreProducts();
+            }
+        });
 
         function handleSearch(e) {
             e.preventDefault();
@@ -189,6 +269,9 @@
         let socket, currentUser = '';
         let localStream, peerConn, pendingSignal;
         let isAudioMuted = false, isVideoOff = false;
+        let replyingToMsg = null;
+        let pendingMediaData = null;
+        let selectedMsgForMenu = null;
 
         async function startSession() {
             const u = document.getElementById('user-input').value.trim();
@@ -222,13 +305,16 @@
             socket.emit('markSeen', currentUser);
 
             socket.on('initialLiveMessages', (list) => {
-                document.getElementById('messages').innerHTML = '';
-                list.forEach(m => renderBubble(m, 'messages'));
+                renderMessagesList(list);
             });
 
             socket.on('message', (msg) => {
-                renderBubble(msg, 'messages');
+                appendMessageNode(msg);
                 if (msg.user !== currentUser) socket.emit('markSeen', currentUser);
+            });
+
+            socket.on('updateMessages', (list) => {
+                renderMessagesList(list);
             });
 
             socket.on('typing', (data) => {
@@ -279,38 +365,195 @@
             });
         }
 
-        function renderBubble(msg, containerId) {
+        function renderMessagesList(list) {
+            const box = document.getElementById('messages');
+            box.innerHTML = '';
+            list.forEach(m => appendMessageNode(m));
+        }
+
+        function appendMessageNode(msg) {
             const isMe = msg.user === currentUser;
             const wrap = document.createElement('div');
             wrap.className = `msg-wrapper ${isMe ? 'me' : 'other'}`;
 
+            let replyHtml = '';
+            if (msg.replyTo) {
+                replyHtml = `<div style="background:rgba(0,0,0,0.2); border-left:3px solid #00a884; padding:3px 6px; font-size:11px; margin-bottom:4px; border-radius:4px; color:#aebac1;">${msg.replyTo}</div>`;
+            }
+
             let mediaPart = '';
             if (msg.fileData) {
-                mediaPart = `<img src="${msg.fileData}" style="max-width:200px; border-radius:6px; margin-bottom:4px; display:block;">`;
+                if (msg.fileType === 'video') {
+                    mediaPart = `<video src="${msg.fileData}" onclick="openMediaViewer('video', '${msg.fileData}')" style="max-width:220px; border-radius:6px; margin-bottom:4px; display:block; cursor:pointer;"></video>`;
+                } else {
+                    mediaPart = `<img src="${msg.fileData}" onclick="openMediaViewer('image', '${msg.fileData}')" style="max-width:220px; border-radius:6px; margin-bottom:4px; display:block; cursor:pointer;">`;
+                }
             }
 
             const tickHtml = isMe ? `<span class="tick ${msg.status === 'seen' ? 'seen' : ''}">${msg.status === 'seen' ? '✓✓' : '✓'}</span>` : '';
 
-            wrap.innerHTML = `
-                <div class="msg-bubble">
-                    ${mediaPart}
-                    <div>${msg.text}</div>
-                    <div style="font-size:9px; color:#8696a0; text-align:right; margin-top:2px;">
-                        <span>${msg.time}</span>
-                        ${tickHtml}
-                    </div>
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble';
+            bubble.innerHTML = `
+                ${replyHtml}
+                ${mediaPart}
+                <div class="msg-text-content">${msg.text}</div>
+                <div style="font-size:9px; color:#8696a0; text-align:right; margin-top:2px;">
+                    <span>${msg.time}</span>
+                    ${tickHtml}
                 </div>
             `;
-            const box = document.getElementById(containerId);
+
+            // Long Press or Right Click handler for Context Menu
+            let pressTimer;
+            bubble.addEventListener('touchstart', (e) => {
+                pressTimer = setTimeout(() => showContextMenu(e, msg, isMe), 600);
+            });
+            bubble.addEventListener('touchend', () => clearTimeout(pressTimer));
+            bubble.addEventListener('touchmove', () => clearTimeout(pressTimer));
+            bubble.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                showContextMenu(e, msg, isMe);
+            });
+
+            // Swipe to reply logic
+            let startX = 0;
+            bubble.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive: true});
+            bubble.addEventListener('touchend', e => {
+                let endX = e.changedTouches[0].clientX;
+                if (endX - startX > 60) {
+                    setReply(msg.user + ": " + (msg.text || "Media"));
+                }
+            });
+
+            wrap.appendChild(bubble);
+            const box = document.getElementById('messages');
             box.appendChild(wrap);
-            wrap.scrollIntoView();
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function showContextMenu(e, msg, isMe) {
+            e.stopPropagation();
+            selectedMsgForMenu = msg;
+            const menu = document.getElementById('msg-context-menu');
+            const editBtn = document.getElementById('menu-edit-btn');
+            const delBtn = document.getElementById('menu-delete-btn');
+
+            if (isMe) {
+                editBtn.style.display = 'block';
+                delBtn.style.display = 'block';
+            } else {
+                editBtn.style.display = 'none';
+                delBtn.style.display = 'none';
+            }
+
+            let clientX = e.clientX || (e.touches ? e.touches[0].clientX : 100);
+            let clientY = e.clientY || (e.touches ? e.touches[0].clientY : 100);
+
+            menu.style.left = Math.min(clientX, window.innerWidth - 150) + 'px';
+            menu.style.top = Math.min(clientY, window.innerHeight - 120) + 'px';
+            menu.style.display = 'block';
+        }
+
+        function closeContextMenu() {
+            document.getElementById('msg-context-menu').style.display = 'none';
+        }
+
+        function triggerReplyFromMenu() {
+            if (selectedMsgForMenu) {
+                setReply(selectedMsgForMenu.user + ": " + (selectedMsgForMenu.text || "Media"));
+            }
+            closeContextMenu();
+        }
+
+        function triggerEditFromMenu() {
+            if (selectedMsgForMenu) {
+                const newTxt = prompt("Edit message:", selectedMsgForMenu.text);
+                if (newTxt !== null && newTxt.trim() !== "") {
+                    socket.emit('editMessage', { id: selectedMsgForMenu.id, user: currentUser, newText: newTxt.trim() });
+                }
+            }
+            closeContextMenu();
+        }
+
+        function triggerDeleteFromMenu() {
+            if (selectedMsgForMenu) {
+                if (confirm("Delete this message?")) {
+                    socket.emit('deleteMessage', selectedMsgForMenu.id);
+                }
+            }
+            closeContextMenu();
+        }
+
+        function openMediaViewer(type, src) {
+            const viewer = document.getElementById('media-viewer');
+            const content = document.getElementById('viewer-content');
+            if (type === 'video') {
+                content.innerHTML = `<video src="${src}" controls autoplay style="max-width:90vw; max-height:80vh;"></video>`;
+            } else {
+                content.innerHTML = `<img src="${src}" style="max-width:90vw; max-height:80vh; object-fit:contain;">`;
+            }
+            viewer.style.display = 'flex';
+        }
+
+        function setReply(txt) {
+            replyingToMsg = txt;
+            document.getElementById('reply-text-preview').innerText = txt;
+            document.getElementById('reply-preview-bar').style.display = 'flex';
+        }
+
+        function cancelReply() {
+            replyingToMsg = null;
+            document.getElementById('reply-preview-bar').style.display = 'none';
+        }
+
+        function previewMedia(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                pendingMediaData = {
+                    type: file.type.startsWith('video') ? 'video' : 'image',
+                    data: evt.target.result
+                };
+                const previewContainer = document.getElementById('preview-container');
+                if (pendingMediaData.type === 'video') {
+                    previewContainer.innerHTML = `<video src="${pendingMediaData.data}" controls style="max-height:60vh; max-width:100%;"></video>`;
+                } else {
+                    previewContainer.innerHTML = `<img src="${pendingMediaData.data}" style="max-height:60vh; max-width:100%;">`;
+                }
+                document.getElementById('media-preview-modal').style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        function sendMediaMessage() {
+            if (!pendingMediaData || !socket) return;
+            const caption = document.getElementById('caption-input').value.trim();
+            socket.emit('chatMessage', {
+                user: currentUser,
+                text: caption,
+                fileType: pendingMediaData.type,
+                fileData: pendingMediaData.data,
+                replyTo: replyingToMsg
+            });
+            document.getElementById('media-preview-modal').style.display = 'none';
+            document.getElementById('caption-input').value = '';
+            pendingMediaData = null;
+            cancelReply();
         }
 
         function sendMessage() {
             const inp = document.getElementById('type-input');
             if (!inp.value.trim() || !socket) return;
-            socket.emit('chatMessage', { user: currentUser, text: inp.value });
+            socket.emit('chatMessage', {
+                user: currentUser,
+                text: inp.value.trim(),
+                replyTo: replyingToMsg
+            });
             inp.value = '';
+            cancelReply();
             socket.emit('typing', { user: currentUser, isTyping: false });
         }
 
@@ -321,22 +564,6 @@
             typeTimer = setTimeout(() => {
                 socket.emit('typing', { user: currentUser, isTyping: false });
             }, 1000);
-        }
-
-        function uploadImage(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                socket.emit('chatMessage', {
-                    user: currentUser,
-                    text: '',
-                    fileType: 'image',
-                    fileData: evt.target.result
-                });
-            };
-            reader.readAsDataURL(file);
-            e.target.value = '';
         }
 
         function deleteChatToVault() {
@@ -356,31 +583,18 @@
 
         async function startCall(callType) {
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    video: callType === 'video',
-                    audio: true
-                });
+                localStream = await navigator.mediaDevices.getUserMedia({ video: callType === 'video', audio: true });
                 document.getElementById('local-video').srcObject = localStream;
                 document.getElementById('call-screen').style.display = 'flex';
                 document.getElementById('call-label').innerText = callType === 'video' ? 'Connecting Media...' : 'Connecting Audio...';
 
-                resetMediaControlState();
-
                 peerConn = new RTCPeerConnection(rtcConfig);
                 localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
-
-                peerConn.ontrack = (e) => {
-                    document.getElementById('remote-video').srcObject = e.streams[0];
-                };
+                peerConn.ontrack = (e) => { document.getElementById('remote-video').srcObject = e.streams[0]; };
 
                 const offer = await peerConn.createOffer();
                 await peerConn.setLocalDescription(offer);
-
-                socket.emit('callUser', {
-                    from: currentUser,
-                    signalData: offer,
-                    callType: callType
-                });
+                socket.emit('callUser', { from: currentUser, signalData: offer, callType: callType });
             } catch (err) {
                 alert('Microphone/Camera permission required.');
             }
@@ -393,19 +607,13 @@
                 document.getElementById('local-video').srcObject = localStream;
                 document.getElementById('call-screen').style.display = 'flex';
 
-                resetMediaControlState();
-
                 peerConn = new RTCPeerConnection(rtcConfig);
                 localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
-
-                peerConn.ontrack = (e) => {
-                    document.getElementById('remote-video').srcObject = e.streams[0];
-                };
+                peerConn.ontrack = (e) => { document.getElementById('remote-video').srcObject = e.streams[0]; };
 
                 await peerConn.setRemoteDescription(new RTCSessionDescription(pendingSignal));
                 const answer = await peerConn.createAnswer();
                 await peerConn.setLocalDescription(answer);
-
                 socket.emit('acceptCall', { signal: answer });
             } catch (err) {
                 alert('Call connection failed');
@@ -436,15 +644,6 @@
             }
         }
 
-        function resetMediaControlState() {
-            isAudioMuted = false;
-            isVideoOff = false;
-            const micBtn = document.getElementById('mic-toggle-btn');
-            const camBtn = document.getElementById('cam-toggle-btn');
-            if (micBtn) { micBtn.innerText = '🎙️'; micBtn.classList.remove('off'); }
-            if (camBtn) { camBtn.innerText = '📷'; camBtn.classList.remove('off'); }
-        }
-
         function rejectIncoming() {
             document.getElementById('incoming-modal').style.display = 'none';
             socket.emit('endCallSignal');
@@ -456,13 +655,8 @@
         }
 
         function closeCallUI() {
-            if (localStream) {
-                localStream.getTracks().forEach(t => t.stop());
-            }
-            if (peerConn) {
-                peerConn.close();
-                peerConn = null;
-            }
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
+            if (peerConn) { peerConn.close(); peerConn = null; }
             document.getElementById('call-screen').style.display = 'none';
             document.getElementById('incoming-modal').style.display = 'none';
         }
