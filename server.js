@@ -12,8 +12,7 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Secret Chat Password aur Vault PIN
-const CHAT_SECRET_PASSWORD = "1717"; // Yahan aap apna pasandida password rakh sakte hain
+const CHAT_SECRET_PASSWORD = "1717";
 const VAULT_PIN = "1717";
 
 let liveMessages = [];
@@ -21,7 +20,6 @@ let deletedMessages = [];
 
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
-    // Password match hona zaroori hai
     if (username && password === CHAT_SECRET_PASSWORD) {
         return res.json({ success: true });
     }
