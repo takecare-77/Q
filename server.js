@@ -12,7 +12,8 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Deleted vault Access PIN
+// Secret Chat Password aur Vault PIN
+const CHAT_SECRET_PASSWORD = "1717"; // Yahan aap apna pasandida password rakh sakte hain
 const VAULT_PIN = "1717";
 
 let liveMessages = [];
@@ -20,10 +21,11 @@ let deletedMessages = [];
 
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
-    if (username && password) {
+    // Password match hona zaroori hai
+    if (username && password === CHAT_SECRET_PASSWORD) {
         return res.json({ success: true });
     }
-    return res.status(400).json({ success: false, message: 'Invalid credentials' });
+    return res.status(400).json({ success: false, message: 'Invalid Password!' });
 });
 
 io.on('connection', (socket) => {
