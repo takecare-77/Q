@@ -6,13 +6,13 @@ const path = require('path');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-    maxHttpBufferSize: 1e7
+    maxHttpBufferSize: 1e8
 });
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Deleted Vault Access PIN
+// Deleted vault Access PIN
 const VAULT_PIN = "1717";
 
 let liveMessages = [];
@@ -63,7 +63,7 @@ io.on('connection', (socket) => {
     socket.on('callUser', (data) => {
         socket.broadcast.emit('incomingCall', {
             from: data.from,
-            signal: data.signalData,
+            signalData: data.signalData,
             callType: data.callType
         });
     });
@@ -88,17 +88,12 @@ io.on('connection', (socket) => {
         if (pin === VAULT_PIN) {
             socket.emit('deletedBoxData', deletedMessages);
         } else {
-            socket.emit('vaultError', 'Galat PIN! Access Denied.');
-        }
-    });
-
-    socket.on('disconnect', () => {
-        if (activeUser) {
-            io.emit('userStatus', { user: activeUser, status: 'Offline' });
-            io.emit('callEnded');
+            socket.emit('vaultError', 'Incorrect PIN code!');
         }
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
