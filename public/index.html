@@ -3,61 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YouTube</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7"></script>
+    <title>TrendStore - Fashion & Lifestyle</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#9c27b0">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
-        body { background: #0f0f0f; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f4f5f8; color: #222; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
 
-        #search-screen { width: 100%; max-width: 580px; padding: 25px 16px; display: flex; flex-direction: column; align-items: center; }
-        .yt-logo-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
-        .yt-icon-box { background: #ff0000; width: 34px; height: 24px; border-radius: 6px; display: flex; justify-content: center; align-items: center; }
-        .yt-play-arrow { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 9px solid #fff; }
-        .yt-text { font-weight: bold; font-size: 20px; letter-spacing: -0.5px; }
+        /* Shopping Storefront */
+        #shop-view { width: 100%; max-width: 480px; background: #fff; min-height: 100vh; padding-bottom: 25px; }
+        .top-navbar { background: #9c27b0; color: #fff; padding: 12px 14px; position: sticky; top: 0; z-index: 50; }
+        .brand-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .brand-name { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; }
+        .nav-icons span { margin-left: 14px; font-size: 18px; cursor: pointer; }
 
-        .search-container { display: flex; width: 100%; border: 1px solid #303030; border-radius: 24px; overflow: hidden; background: #121212; align-items: center; }
-        .search-container:focus-within { border-color: #1c62b9; }
-        .yt-input { flex: 1; padding: 12px 16px; background: transparent; border: none; color: #fff; font-size: 15px; outline: none; }
-        .yt-btn { background: #222; border: none; border-left: 1px solid #303030; padding: 12px 20px; color: #aaa; cursor: pointer; font-size: 16px; }
+        .search-wrap { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 10px 38px 10px 14px; border-radius: 8px; border: none; outline: none; font-size: 13px; color: #333; }
+        .search-icon-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 14px; cursor: pointer; color: #666; }
 
-        .video-container { width: 100%; margin-top: 20px; border-radius: 12px; overflow: hidden; background: #000; aspect-ratio: 16/9; }
-        .video-container iframe { width: 100%; height: 100%; border: none; }
+        #fake-history { display: none; position: absolute; top: 42px; left: 0; right: 0; background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 6px 14px rgba(0,0,0,0.18); z-index: 60; }
+        .history-item { padding: 10px 14px; font-size: 13px; color: #444; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        .history-item:hover { background: #fafafa; }
 
-        .box { display: none; background: #1f2c34; padding: 25px; border-radius: 10px; width: 90%; max-width: 330px; margin-top: 15vh; }
+        .promo-banner { background: linear-gradient(135deg, #f80759, #bc4e9c); color: #fff; padding: 14px; text-align: center; }
+        .promo-banner h3 { font-size: 15px; margin-bottom: 3px; font-weight: 700; }
+        .promo-banner p { font-size: 11px; opacity: 0.95; }
+
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px; }
+        .card { background: #fff; border-radius: 8px; border: 1px solid #eaeaea; overflow: hidden; display: flex; flex-direction: column; }
+        .card-img-wrap { position: relative; width: 100%; height: 170px; background: #fff; }
+        .card img { width: 100%; height: 100%; object-fit: contain; }
+        .source-tag { position: absolute; bottom: 6px; left: 6px; background: rgba(0,0,0,0.7); color: #fff; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
+        
+        .card-body { padding: 8px; display: flex; flex-direction: column; flex: 1; }
+        .card-title { font-size: 12px; font-weight: 500; color: #333; margin-bottom: 6px; line-height: 1.3; height: 32px; overflow: hidden; }
+        .price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+        .price { font-size: 14px; font-weight: bold; color: #222; }
+        .old-price { font-size: 11px; text-decoration: line-through; color: #888; }
+        .buy-link-btn { margin-top: auto; display: block; text-decoration: none; padding: 7px 0; background: #fdf2fe; border: 1px solid #9c27b0; border-radius: 6px; font-size: 11px; font-weight: bold; color: #9c27b0; text-align: center; }
+
+        /* Secret Auth Screen */
+        .box { display: none; background: #1f2c34; padding: 25px; border-radius: 10px; width: 90%; max-width: 330px; margin-top: 15vh; color: #fff; }
         .box h2 { font-size: 16px; text-align: center; margin-bottom: 15px; color: #00a884; }
         input.auth-input { width: 100%; padding: 12px; margin: 8px 0; background: #2a3942; border: 1px solid #33444d; color: #fff; border-radius: 6px; outline: none; font-size: 14px; }
         button.auth-btn { width: 100%; padding: 12px; background: #00a884; border: none; color: #fff; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 6px; font-size: 14px; }
 
+        /* Secret Chatroom */
         #chat-section { display: none; width: 100%; max-width: 500px; height: 100vh; flex-direction: column; background: #0b141a; }
         .chat-header { height: 60px; background: #202c33; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; border-bottom: 1px solid #2a3942; }
         .user-title { font-size: 15px; font-weight: 600; color: #e9edef; }
         .typing-sub { font-size: 11px; color: #25d366; height: 14px; }
-        
-        .header-actions { display: flex; align-items: center; gap: 8px; }
+        .header-actions { display: flex; align-items: center; gap: 6px; }
         .icon-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: #aebac1; padding: 6px; border-radius: 50%; }
-        .btn-panic { background: #d32f2f; color: #fff; border: none; padding: 6px 12px; font-size: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-panic { background: #d32f2f; color: #fff; border: none; padding: 6px 10px; font-size: 11px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
-        #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background: #0b141a; }
-        
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 82%; position: relative; }
+        #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: #0b141a; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 82%; position: relative; transition: opacity 0.4s ease; }
         .msg-wrapper.me { align-self: flex-end; }
         .msg-wrapper.other { align-self: flex-start; }
-
-        .msg-bubble { padding: 7px 10px; border-radius: 8px; font-size: 14px; line-height: 1.35; color: #e9edef; word-break: break-word; }
+        .msg-bubble { position: relative; padding: 7px 10px; border-radius: 8px; font-size: 14px; line-height: 1.35; color: #e9edef; word-break: break-word; cursor: pointer; }
         .me .msg-bubble { background: #005c4b; }
         .other .msg-bubble { background: #202c33; }
 
-        .reply-quote { background: rgba(0,0,0,0.3); border-left: 3px solid #25d366; padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 5px; }
+        .vanish-badge { font-size: 10px; color: #f39c12; font-weight: bold; display: flex; align-items: center; gap: 3px; margin-bottom: 2px; }
+        .vanish-timer { color: #e74c3c; font-weight: bold; }
+
+        .reaction-bar { display: none; position: absolute; top: -38px; left: 0; background: #202c33; border-radius: 20px; padding: 4px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.6); gap: 8px; z-index: 20; border: 1px solid #2a3942; }
+        .reaction-bar span { cursor: pointer; font-size: 17px; }
+        .reaction-badge { position: absolute; bottom: -10px; right: 8px; background: #2a3942; border-radius: 12px; padding: 1px 5px; font-size: 12px; border: 1px solid #111b21; display: none; }
+
         .media-preview { width: 100%; max-width: 250px; max-height: 250px; border-radius: 6px; margin-top: 4px; object-fit: cover; }
-        
         .meta-info { font-size: 10px; color: #8696a0; display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 3px; }
         .tick { font-size: 12px; color: #8696a0; }
         .tick.seen { color: #53bdeb; }
 
-        #reply-bar { display: none; background: #1f2c34; padding: 8px 12px; border-left: 4px solid #00a884; justify-content: space-between; align-items: center; }
         .chat-footer { padding: 8px; background: #202c33; display: flex; align-items: center; gap: 6px; }
         .attach-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #8696a0; }
+        .toggle-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: #8696a0; padding: 4px; border-radius: 4px; }
+        .toggle-btn.active { color: #f39c12; filter: drop-shadow(0 0 2px #f39c12); }
         .input-bar { flex: 1; background: #2a3942; border-radius: 20px; padding: 9px 14px; color: #fff; border: none; outline: none; font-size: 14px; }
         .send-btn { background: #00a884; border: none; width: 38px; height: 38px; border-radius: 50%; color: #fff; cursor: pointer; font-size: 16px; }
 
@@ -67,41 +90,54 @@
 </head>
 <body>
 
-    <video id="guard-cam" autoplay playsinline muted style="display:none;"></video>
     <input type="file" id="media-uploader" accept="image/*,video/*" style="display:none;" onchange="handleFileUpload(event)">
     <div id="media-modal" onclick="closeMediaModal()"></div>
 
-    <div id="search-screen">
-        <div class="yt-logo-wrap">
-            <div class="yt-icon-box"><div class="yt-play-arrow"></div></div>
-            <span class="yt-text">YouTube</span>
+    <!-- TrendStore Camouflage -->
+    <div id="shop-view">
+        <div class="top-navbar">
+            <div class="brand-row">
+                <span class="brand-name">TrendStore</span>
+                <div class="nav-icons">
+                    <span>❤️</span>
+                    <span>🛒</span>
+                </div>
+            </div>
+            <div class="search-wrap">
+                <input type="text" id="store-search" class="search-input" 
+                       placeholder="Search Sarees, Kurtis, Shoes, Hoodies..." 
+                       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                       onfocus="showFakeHistory()" onblur="hideFakeHistoryWithDelay()"
+                       onkeypress="if(event.key==='Enter') executeShopSearch()">
+                <button class="search-icon-btn" onclick="executeShopSearch()">🔍</button>
+
+                <div id="fake-history">
+                    <div class="history-item" onclick="setFakeQuery('Anarkali Kurti')">🕒 Anarkali Kurti Set</div>
+                    <div class="history-item" onclick="setFakeQuery('Sneakers')">🕒 White Casual Sneakers</div>
+                    <div class="history-item" onclick="setFakeQuery('Smartwatch')">🕒 Bluetooth Calling Smartwatch</div>
+                    <div class="history-item" onclick="setFakeQuery('Oversized Hoodie')">🕒 Oversized Cotton Hoodie</div>
+                </div>
+            </div>
         </div>
-        <div class="search-container">
-            <input type="text" id="fake-search" class="yt-input" placeholder="Search" oninput="checkAutoTrigger(this.value)" onkeypress="if(event.key==='Enter') executeSearch()">
-            <button class="yt-btn" type="button" onclick="executeSearch()">🔍</button>
+
+        <div class="promo-banner">
+            <h3>Mega Clearance Festival 🔥</h3>
+            <p>Lowest Price Guaranteed • Free Cash on Delivery</p>
         </div>
-        <div class="video-container">
-            <iframe id="yt-player" src="https://www.youtube.com/embed/jfKfPfyJRdk" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
+
+        <div class="product-grid" id="product-list"></div>
     </div>
 
+    <!-- Secret Auth Form -->
     <div class="box" id="login-section">
-        <h2>Identity Check</h2>
+        <h2>Identity Verification</h2>
         <input type="text" id="username" class="auth-input" placeholder="Username" autocomplete="off">
         <input type="password" id="password" class="auth-input" placeholder="Password">
         <button class="auth-btn" onclick="login()">Enter</button>
         <p id="err" style="color: #ff5252; font-size: 11px; margin-top: 8px; text-align: center;"></p>
     </div>
 
-    <div class="box" id="pin-modal" style="position: absolute; z-index: 100;">
-        <h2>System Settings</h2>
-        <p style="font-size: 11px; color: #8696a0; text-align: center; margin-bottom: 8px;">Enter PIN to restore messages:</p>
-        <input type="password" id="history-pin" class="auth-input" maxlength="4" placeholder="••••" style="letter-spacing: 6px; text-align: center;">
-        <button class="auth-btn" onclick="unlockHistory()">Restore Vault</button>
-        <button class="auth-btn" onclick="closePinModal()" style="background: #33444d; margin-top: 6px;">Cancel</button>
-        <p id="pin-err" style="color: #ff5252; font-size: 11px; margin-top: 8px; text-align: center;"></p>
-    </div>
-
+    <!-- Encrypted Chat Screen -->
     <div id="chat-section">
         <div class="chat-header">
             <div>
@@ -109,24 +145,17 @@
                 <div class="typing-sub" id="typing-status"></div>
             </div>
             <div class="header-actions">
-                <button class="icon-btn" title="Settings" onclick="showPinPrompt()">⚙️</button>
-                <button class="icon-btn" title="Clear" onclick="clearAllChat()">🧹</button>
+                <button class="icon-btn" title="Back to Shop" onclick="exitSafety()">🛍️</button>
+                <button class="icon-btn" title="Clear Chat" onclick="clearAllChat()">🧹</button>
                 <button class="btn-panic" onclick="exitSafety()">Exit</button>
             </div>
         </div>
 
         <div id="messages"></div>
 
-        <div id="reply-bar">
-            <div>
-                <strong id="reply-to-user" style="font-size:11px; color:#00a884;"></strong>
-                <p id="reply-to-text" style="font-size:12px; color:#fff;"></p>
-            </div>
-            <button onclick="cancelReply()" style="background:none; border:none; color:#8696a0; font-size:18px; cursor:pointer;">✕</button>
-        </div>
-
         <div class="chat-footer">
             <button class="attach-btn" onclick="document.getElementById('media-uploader').click()">📎</button>
+            <button class="toggle-btn" id="vanish-toggle-btn" onclick="toggleVanishMode()" title="Toggle View Once Timer">⏱️</button>
             <input type="text" id="msg-input" class="input-bar" placeholder="Type a message..." oninput="handleTyping()" onkeypress="if(event.key==='Enter') sendTextMessage()">
             <button class="send-btn" onclick="sendTextMessage()">➤</button>
         </div>
@@ -134,50 +163,114 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const SECRET_KEY = "safe";
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
 
-        function checkAutoTrigger(val) {
-            if (val.trim().toLowerCase() === SECRET_KEY) {
-                openLogin();
+        const SECRET_TRIGGER = "t9";
+        let isVanishMode = false;
+
+        function toggleVanishMode() {
+            isVanishMode = !isVanishMode;
+            document.getElementById('vanish-toggle-btn').classList.toggle('active', isVanishMode);
+        }
+
+        const realCatalog = [
+            {
+                title: "Women Printed Rayon Anarkali Kurta",
+                price: "₹349",
+                oldPrice: "₹899",
+                img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=400&q=80",
+                source: "Meesho",
+                link: "https://www.meesho.com/search?q=rayon+anarkali+kurta"
+            },
+            {
+                title: "Men White Casual Lightweight Sneakers",
+                price: "₹499",
+                oldPrice: "₹1,299",
+                img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=400&q=80",
+                source: "Flipkart",
+                link: "https://www.flipkart.com/search?q=white+sneakers+men"
+            },
+            {
+                title: "Kanjivaram Silk Blend Woven Saree",
+                price: "₹599",
+                oldPrice: "₹1,899",
+                img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=400&q=80",
+                source: "Meesho",
+                link: "https://www.meesho.com/search?q=kanjivaram+silk+saree"
+            },
+            {
+                title: "Unisex Fleece Oversized Winter Hoodie",
+                price: "₹449",
+                oldPrice: "₹1,199",
+                img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=400&q=80",
+                source: "Flipkart",
+                link: "https://www.flipkart.com/search?q=oversized+hoodie"
+            }
+        ];
+
+        function renderCatalog() {
+            const container = document.getElementById('product-list');
+            container.innerHTML = '';
+            realCatalog.forEach(p => {
+                container.innerHTML += `
+                    <div class="card">
+                        <div class="card-img-wrap">
+                            <img src="${p.img}" alt="${p.title}" loading="lazy">
+                            <span class="source-tag">${p.source}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">${p.title}</div>
+                            <div class="price-row">
+                                <span class="price">${p.price}</span>
+                                <span class="old-price">${p.oldPrice}</span>
+                            </div>
+                            <a href="${p.link}" target="_blank" rel="noopener noreferrer" class="buy-link-btn">
+                                Buy on ${p.source} ↗
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        renderCatalog();
+
+        function showFakeHistory() { document.getElementById('fake-history').style.display = 'block'; }
+        function hideFakeHistoryWithDelay() {
+            setTimeout(() => { document.getElementById('fake-history').style.display = 'none'; }, 250);
+        }
+        function setFakeQuery(text) {
+            document.getElementById('store-search').value = text;
+            executeShopSearch();
+        }
+
+        function executeShopSearch() {
+            const val = document.getElementById('store-search').value.trim();
+            if (val.toLowerCase() === SECRET_TRIGGER) {
+                document.getElementById('store-search').value = '';
+                document.getElementById('fake-history').style.display = 'none';
+                document.getElementById('shop-view').style.display = 'none';
+                document.getElementById('login-section').style.display = 'block';
+            } else if (val) {
+                window.open(`https://www.meesho.com/search?q=${encodeURIComponent(val)}`, '_blank');
             }
         }
 
-        function executeSearch() {
-            const query = (document.getElementById('fake-search').value || '').trim();
-            if (query.toLowerCase() === SECRET_KEY) {
-                openLogin();
-            } else if (query) {
-                document.getElementById('yt-player').src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1`;
-            }
-        }
-
-        function openLogin() {
-            document.getElementById('search-screen').style.display = 'none';
-            document.getElementById('login-section').style.display = 'block';
-        }
-
-        let aiModel = null;
-        async function initAiGuard() {
-            try {
-                aiModel = await blazeface.load();
-                const video = document.getElementById('guard-cam');
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-                video.srcObject = stream;
-                setInterval(async () => {
-                    if (document.getElementById('chat-section').style.display === 'flex' && aiModel && video.readyState === 4) {
-                        const predictions = await aiModel.estimateFaces(video, false);
-                        if (predictions.length > 1) exitSafety();
-                    }
-                }, 400);
-            } catch (err) {}
-        }
+        // App-Switch Panic Reset
+        document.addEventListener("visibilitychange", () => { if (document.hidden) exitSafety(); });
+        window.addEventListener("blur", () => {
+            if (document.getElementById('chat-section').style.display === 'flex') exitSafety();
+        });
 
         function exitSafety() {
             document.getElementById('messages').innerHTML = '';
-            window.location.replace("https://www.youtube.com");
+            location.reload();
         }
 
-        let socket, currentUser = '', replyTarget = null;
+        // Chat Engine & Sockets
+        let socket, currentUser = '';
 
         async function login() {
             const u = document.getElementById('username').value.trim();
@@ -192,7 +285,6 @@
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('chat-section').style.display = 'flex';
                 document.getElementById('user-display').innerText = `@${currentUser}`;
-                initAiGuard();
                 initSockets();
             } else {
                 document.getElementById('err').innerText = data.message;
@@ -207,6 +299,14 @@
             socket.on('message', (msg) => {
                 renderMessage(msg);
                 if (msg.user !== currentUser) socket.emit('markSeen', currentUser);
+            });
+
+            socket.on('reactionUpdate', ({ msgId, emoji }) => {
+                const badge = document.getElementById(`reaction-badge-${msgId}`);
+                if (badge) {
+                    badge.innerText = emoji;
+                    badge.style.display = 'inline-block';
+                }
             });
 
             socket.on('typing', (data) => {
@@ -239,9 +339,12 @@
         function sendTextMessage() {
             const input = document.getElementById('msg-input');
             if (!input.value.trim()) return;
-            socket.emit('chatMessage', { user: currentUser, text: input.value, replyTo: replyTarget });
+            socket.emit('chatMessage', { 
+                user: currentUser, 
+                text: input.value,
+                vanish: isVanishMode
+            });
             input.value = '';
-            cancelReply();
             socket.emit('typing', { user: currentUser, isTyping: false });
         }
 
@@ -255,9 +358,8 @@
                     user: currentUser,
                     fileType: isVideo ? 'video' : 'image',
                     fileData: evt.target.result,
-                    replyTo: replyTarget
+                    vanish: isVanishMode
                 });
-                cancelReply();
             };
             reader.readAsDataURL(file);
             e.target.value = '';
@@ -265,80 +367,6 @@
 
         function renderMessage(msg) {
             const isMe = msg.user === currentUser;
+            const msgId = msg.id || 'msg_' + Date.now();
             const wrap = document.createElement('div');
-            wrap.className = `msg-wrapper ${isMe ? 'me' : 'other'}`;
-
-            let replyHtml = '';
-            if (msg.replyTo) {
-                replyHtml = `<div class="reply-quote"><strong>${msg.replyTo.user}:</strong> ${msg.replyTo.text || '[Media]'}</div>`;
-            }
-
-            let mediaHtml = '';
-            if (msg.fileType === 'image') {
-                mediaHtml = `<img src="${msg.fileData}" class="media-preview" onclick="openMedia('${msg.fileData}', 'image')">`;
-            } else if (msg.fileType === 'video') {
-                mediaHtml = `<video src="${msg.fileData}" class="media-preview" onclick="openMedia('${msg.fileData}', 'video')" controls></video>`;
-            }
-
-            const tickHtml = isMe ? `<span class="tick ${msg.status === 'seen' ? 'seen' : ''}">${msg.status === 'seen' ? '✓✓' : '✓'}</span>` : '';
-
-            wrap.innerHTML = `
-                <div class="msg-bubble">
-                    ${replyHtml}
-                    <div>${msg.text || ''}</div>
-                    ${mediaHtml}
-                    <div class="meta-info">
-                        <span>${msg.time}</span>
-                        ${tickHtml}
-                    </div>
-                </div>
-            `;
-            document.getElementById('messages').appendChild(wrap);
-            wrap.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function cancelReply() {
-            replyTarget = null;
-            document.getElementById('reply-bar').style.display = 'none';
-        }
-
-        function openMedia(src, type) {
-            const modal = document.getElementById('media-modal');
-            modal.innerHTML = type === 'image' ? `<img src="${src}">` : `<video src="${src}" controls autoplay></video>`;
-            modal.style.display = 'flex';
-        }
-
-        function closeMediaModal() {
-            document.getElementById('media-modal').style.display = 'none';
-            document.getElementById('media-modal').innerHTML = '';
-        }
-
-        function showPinPrompt() { 
-            document.getElementById('pin-modal').style.display = 'block'; 
-            document.getElementById('history-pin').value = '';
-            document.getElementById('pin-err').innerText = '';
-        }
-        function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; }
-
-        async function unlockHistory() {
-            const pin = document.getElementById('history-pin').value.trim();
-            const res = await fetch('/api/history', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pin })
-            });
-            const data = await res.json();
-            if (data.success) {
-                document.getElementById('messages').innerHTML = '';
-                data.history.forEach(m => renderMessage(m));
-                closePinModal();
-            } else {
-                document.getElementById('pin-err').innerText = data.message;
-            }
-        }
-
-        function clearAllChat() {
-            if (confirm("Permanently wipe active vault session?")) socket.emit('clearHistory');
-        }
-    </script>
-</body>
-</html>
+            wrap.className = `msg-wrapper ${isMe ? 'me' :
