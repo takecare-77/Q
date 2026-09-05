@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TrendStore - Fashion & Lifestyle</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
@@ -25,22 +25,58 @@
         .auth-input { width: 100%; padding: 10px; margin: 8px 0; background: #2a3942; border: 1px solid #33444d; color: #fff; border-radius: 4px; outline: none; }
         .auth-btn { width: 100%; padding: 10px; background: #00a884; border: none; color: #fff; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
 
-        #chat-section { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; background: #0b141a; }
-        .wa-header { height: 55px; background: #202c33; display: flex; align-items: center; padding: 0 12px; gap: 10px; border-bottom: 1px solid #2a3942; }
-        #messages { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-        .msg { background: #005c4b; color: #fff; padding: 6px 10px; border-radius: 6px; max-width: 75%; align-self: flex-end; font-size: 14px; word-break: break-word; }
-        .chat-footer { padding: 8px; background: #202c33; display: flex; gap: 6px; align-items: center; }
-        .chat-footer input { flex: 1; padding: 8px 12px; background: #2a3942; border: none; outline: none; color: #fff; border-radius: 20px; font-size: 14px; }
-        .send-btn { background: #00a884; border: none; color: #fff; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+        #chat-section { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; background: #0b141a; position: relative; }
+        .wa-header { height: 60px; background: #202c33; display: flex; align-items: center; padding: 0 10px; gap: 10px; border-bottom: 1px solid #2a3942; }
+        .peer-info { flex: 1; }
+        .peer-name { font-size: 16px; font-weight: 600; color: #e9edef; }
+        .peer-status { font-size: 11px; color: #8696a0; }
+        .wa-actions { display: flex; align-items: center; gap: 4px; }
+        .wa-btn { background: none; border: none; font-size: 16px; color: #aebac1; cursor: pointer; padding: 6px; }
+
+        #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background-image: radial-gradient(#182229 10%, transparent 11%); background-size: 18px 18px; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 78%; }
+        .msg-wrapper.me { align-self: flex-end; }
+        .msg-wrapper.other { align-self: flex-start; }
+        .msg-bubble { padding: 6px 9px 4px 9px; border-radius: 8px; font-size: 14.2px; line-height: 1.35; word-break: break-word; background: #202c33; color: #e9edef; }
+        .me .msg-bubble { background: #005c4b; }
+
+        .chat-footer { padding: 8px; background: #202c33; display: flex; align-items: center; gap: 6px; }
+        .chat-footer input { flex: 1; background: #2a3942; border: none; outline: none; color: #fff; font-size: 15px; padding: 8px 12px; border-radius: 20px; }
+        .send-round-btn { width: 40px; height: 40px; background: #00a884; border-radius: 50%; border: none; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+
+        #pin-modal, #deleted-box-view { display: none; position: fixed; inset: 0; z-index: 100; }
+        #pin-modal { background: rgba(0,0,0,0.85); justify-content: center; align-items: center; }
+        .modal-box { background: #202c33; border-radius: 12px; padding: 22px; width: 85%; max-width: 320px; text-align: center; }
+        #deleted-box-view { background: #0b141a; flex-direction: column; z-index: 150; }
+        .deleted-box-header { height: 60px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid #2a3942; }
     </style>
 </head>
 <body>
+
+    <div id="pin-modal">
+        <div class="modal-box">
+            <h3 style="color:#00a884; margin-bottom:10px;">Secret Deleted Vault</h3>
+            <p style="font-size: 12px; color: #8696a0; margin-bottom: 10px;">Enter PIN (1717)</p>
+            <input type="password" id="vault-pin-input" class="auth-input" placeholder="Enter PIN">
+            <button class="auth-btn" onclick="submitVaultPin()">Open Vault</button>
+            <button class="auth-btn" style="background: #39444d; margin-top: 6px;" onclick="document.getElementById('pin-modal').style.display='none'">Cancel</button>
+            <p id="pin-err" style="color: #ff5252; font-size: 11px; margin-top: 8px;"></p>
+        </div>
+    </div>
+
+    <div id="deleted-box-view">
+        <div class="deleted-box-header">
+            <span style="font-weight:bold;">🗑️ Deleted Messages Vault</span>
+            <button class="wa-btn" style="background: #00a884; color: #fff; padding: 6px 12px; border-radius: 4px;" onclick="document.getElementById('deleted-box-view').style.display='none'">Back</button>
+        </div>
+        <div id="deleted-messages-list" style="flex:1; padding:14px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
 
     <div id="shop-view">
         <div class="top-navbar">
             <span class="brand-name">TrendStore</span>
             <form onsubmit="handleSearch(event)">
-                <input type="text" id="store-search" class="search-input" placeholder="Search Sarees, Kurtis, Shoes, Hoodies..." autocomplete="off">
+                <input type="text" id="store-search" class="search-input" placeholder="Search Sarees, Kurtis, Shoes..." autocomplete="off">
             </form>
         </div>
         <div class="promo">Mega Clearance Sale • Free Delivery 🔥</div>
@@ -49,27 +85,35 @@
     </div>
 
     <div id="login-section">
-        <h3 style="color:#00a884; margin-bottom:12px;">Secure Sign-in</h3>
-        <input type="text" id="user-input" class="auth-input" placeholder="Username">
+        <h3 style="color:#00a884; margin-bottom:15px;">WhatsApp Secure Sign-in</h3>
+        <input type="text" id="user-input" class="auth-input" placeholder="Your Name / ID">
         <input type="password" id="pass-input" class="auth-input" placeholder="Password">
-        <button class="auth-btn" onclick="login()">Login</button>
+        <button class="auth-btn" onclick="startSession()">Login</button>
     </div>
 
     <div id="chat-section">
         <div class="wa-header">
-            <span style="font-weight:bold; font-size:16px;" id="chat-title">Chat</span>
-            <span style="margin-left:auto; font-size:12px; color:#8696a0;" onclick="location.reload()">Exit ✖</span>
+            <div class="peer-info">
+                <div class="peer-name" id="chat-title">Chat Room</div>
+                <div class="peer-status" id="status-display">online</div>
+            </div>
+            <div class="wa-actions">
+                <button class="wa-btn" title="Move to Deleted Box" onclick="deleteChatToVault()">🗑️</button>
+                <button class="wa-btn" title="Open Deleted Box (PIN: 1717)" onclick="document.getElementById('pin-modal').style.display='flex'">📂</button>
+                <button class="wa-btn" title="Exit" onclick="location.reload()">✖</button>
+            </div>
         </div>
+
         <div id="messages"></div>
+
         <div class="chat-footer">
-            <input type="text" id="type-input" placeholder="Type a message" onkeypress="if(event.key==='Enter') sendMsg()">
-            <button class="send-btn" onclick="sendMsg()">➤</button>
+            <input type="text" id="type-input" placeholder="Message" onkeypress="if(event.key==='Enter') sendMessage()">
+            <button class="send-round-btn" onclick="sendMessage()">➤</button>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // 60+ completely distinct products with unique photos and titles
         const allUniqueProducts = [
             { title: "Women Printed Rayon Anarkali Kurta", price: "₹349", source: "Meesho", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70" },
             { title: "Men White Casual Lightweight Sneakers", price: "₹499", source: "Flipkart", img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70" },
@@ -90,80 +134,33 @@
             { title: "Stainless Steel Insulated Water Bottle 1L", price: "₹449", source: "Amazon", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70" },
             { title: "Women Pointed Toe Block Heel Sandals", price: "₹649", source: "Myntra", img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=350&q=70" },
             { title: "Fast Charging 20000mAh Power Bank", price: "₹1,099", source: "Flipkart", img: "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70" },
-            { title: "Herbal Onion Hair Oil for Fall Control", price: "₹249", source: "Nykaa", img: "https://images.unsplash.com/photo-1608248597359-009772a806ff?w=350&q=70" },
-            { title: "Traditional Gold Plated Jewellery Set", price: "₹319", source: "Meesho", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=350&q=70" },
-            { title: "Comfort Fit Sports Running Track Pants", price: "₹389", source: "Ajio", img: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=350&q=70" },
-            { title: "RGB Backlit Mechanical Gaming Keyboard", price: "₹1,499", source: "Amazon", img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=350&q=70" },
-            { title: "Women Quilted Tote Shoulder Bag", price: "₹599", source: "Myntra", img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=350&q=70" },
-            { title: "Men Running Lightweight Mesh Shoes", price: "₹599", source: "Flipkart", img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=350&q=70" },
-            { title: "Hydrating Hyaluronic Acid Sunscreen SPF50", price: "₹349", source: "Nykaa", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=350&q=70" },
-            { title: "Printed Pure Cotton Double Bed Bedsheet", price: "₹399", source: "Meesho", img: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=350&q=70" },
-            { title: "Men Slim Fit Washed Cargo Pants", price: "₹799", source: "Ajio", img: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=350&q=70" },
-            { title: "Mini Portable Bluetooth Speaker 10W", price: "₹699", source: "Amazon", img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=350&q=70" },
-            { title: "Silver Plated Oxidised Tribal Choker", price: "₹199", source: "Myntra", img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=350&q=70" },
-            { title: "Heavy Bass Wired In-Ear Earphones", price: "₹199", source: "Flipkart", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=350&q=70" },
-            { title: "Deep Hydration Body Lotion 400ml", price: "₹269", source: "Nykaa", img: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=350&q=70" },
-            { title: "Ethnic Rayon Flared Solid Palazzo", price: "₹249", source: "Meesho", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=350&q=70" },
-            { title: "Men Casual Slip-On Loafers", price: "₹549", source: "Ajio", img: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=350&q=70" },
-            { title: "Ultra Slim Wireless Silent Mouse", price: "₹349", source: "Amazon", img: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=350&q=70" },
-            { title: "Printed A-Line Summer Casual Top", price: "₹329", source: "Myntra", img: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=350&q=70" },
-            { title: "Classic Analog Leather Strap Men Watch", price: "₹699", source: "Flipkart", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=350&q=70" },
-            { title: "Charcoal Face Wash Deep Cleanse 150ml", price: "₹189", source: "Nykaa", img: "https://images.unsplash.com/photo-1556228722-d0b5d15c7e0c?w=350&q=70" },
-            { title: "Chiffon Daily Wear Printed Saree", price: "₹389", source: "Meesho", img: "https://images.unsplash.com/photo-1610030469668-932ec596e761?w=350&q=70" },
-            { title: "Men Regular Fit Denim Jacket", price: "₹999", source: "Ajio", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=350&q=70" },
-            { title: "Multipurpose Kitchen Spice Rack 4-Tier", price: "₹499", source: "Amazon", img: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=350&q=70" },
-            { title: "High Ankle Casual Canvas Boots", price: "₹799", source: "Flipkart", img: "https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=350&q=70" },
-            { title: "Smudge-Proof Intense Black Eyeliner", price: "₹199", source: "Nykaa", img: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=350&q=70" },
-            { title: "Men Solid Round Neck Gym Vest Pack", price: "₹299", source: "Ajio", img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=350&q=70" },
-            { title: "Decorative Warm LED String Fairy Lights", price: "₹149", source: "Amazon", img: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=350&q=70" },
-            { title: "Embellished Velvet Party Clutch", price: "₹449", source: "Meesho", img: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=350&q=70" },
-            { title: "Men Formal Oxford Lace-Up Shoes", price: "₹899", source: "Flipkart", img: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=350&q=70" },
-            { title: "Volumizing Waterproof Mascara 10ml", price: "₹289", source: "Nykaa", img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=350&q=70" },
-            { title: "Women Casual Open Front Shrug", price: "₹319", source: "Myntra", img: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=350&q=70" },
-            { title: "Pure Copper Water Bottle 900ml", price: "₹599", source: "Amazon", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70" }
+            { title: "Herbal Onion Hair Oil for Fall Control", price: "₹249", source: "Nykaa", img: "https://images.unsplash.com/photo-1608248597359-009772a806ff?w=350&q=70" }
         ];
 
-        let shuffledCatalog = [];
+        let shuffledCatalog = [...allUniqueProducts].sort(() => 0.5 - Math.random());
         let displayedCount = 0;
-        const batchSize = 16;
-
-        function initCatalog() {
-            // Shuffle the unique products array completely on load
-            shuffledCatalog = [...allUniqueProducts].sort(() => 0.5 - Math.random());
-        }
-
-        initCatalog();
 
         function loadMoreProducts() {
             const container = document.getElementById('product-list');
             const loader = document.getElementById('loader');
-            
-            if (displayedCount >= shuffledCatalog.length) {
-                loader.style.display = 'none';
-                return;
-            }
-
+            if (displayedCount >= shuffledCatalog.length) { loader.style.display = 'none'; return; }
             loader.style.display = 'block';
-            
             setTimeout(() => {
-                const nextBatch = shuffledCatalog.slice(displayedCount, displayedCount + batchSize);
+                const nextBatch = shuffledCatalog.slice(displayedCount, displayedCount + 12);
                 let html = '';
                 nextBatch.forEach(p => {
                     const searchUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.title + " " + p.source)}`;
                     html += `<div class="card"><img src="${p.img}" loading="lazy"><div class="card-body"><div class="title">${p.title}</div><div class="price">${p.price}</div><a href="${searchUrl}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
                 });
                 container.insertAdjacentHTML('beforeend', html);
-                displayedCount += batchSize;
+                displayedCount += 12;
                 loader.style.display = 'none';
             }, 300);
         }
 
         loadMoreProducts();
-
         window.addEventListener('scroll', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
-                loadMoreProducts();
-            }
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) loadMoreProducts();
         });
 
         function handleSearch(e) {
@@ -178,26 +175,76 @@
         }
 
         let socket, currentUser = '';
-        function login() {
-            currentUser = document.getElementById('user-input').value.trim();
-            if(!currentUser) return;
+        function startSession() {
+            const u = document.getElementById('user-input').value.trim();
+            const p = document.getElementById('pass-input').value.trim();
+            if (!u || !p) return;
+            currentUser = u;
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('chat-section').style.display = 'flex';
-            document.getElementById('chat-title').innerText = currentUser;
+            document.getElementById('chat-title').innerText = u;
+
             socket = io();
             socket.emit('joinRoom', currentUser);
+
+            socket.on('initialLiveMessages', (list) => {
+                document.getElementById('messages').innerHTML = '';
+                list.forEach(m => renderBubble(m, 'messages'));
+            });
+
             socket.on('message', (msg) => {
-                const box = document.getElementById('messages');
-                box.innerHTML += `<div class="msg">${msg.text}</div>`;
-                box.scrollTop = box.scrollHeight;
+                renderBubble(msg, 'messages');
+            });
+
+            socket.on('liveChatCleared', () => {
+                document.getElementById('messages').innerHTML = '';
+            });
+
+            socket.on('deletedBoxData', (list) => {
+                document.getElementById('pin-modal').style.display = 'none';
+                const container = document.getElementById('deleted-messages-list');
+                container.innerHTML = '';
+                if (list.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; color:#8696a0; margin-top:20px;">No deleted messages.</div>';
+                } else {
+                    list.forEach(m => renderBubble(m, 'deleted-messages-list'));
+                }
+                document.getElementById('deleted-box-view').style.display = 'flex';
+            });
+
+            socket.on('vaultError', (err) => {
+                document.getElementById('pin-err').innerText = err;
             });
         }
 
-        function sendMsg() {
+        function renderBubble(msg, containerId) {
+            const isMe = msg.user === currentUser;
+            const wrap = document.createElement('div');
+            wrap.className = `msg-wrapper ${isMe ? 'me' : 'other'}`;
+            wrap.innerHTML = `<div class="msg-bubble"><div>${msg.text}</div><div style="font-size:9px; color:#8696a0; text-align:right; margin-top:2px;">${msg.time}</div></div>`;
+            const box = document.getElementById(containerId);
+            box.appendChild(wrap);
+            wrap.scrollIntoView();
+        }
+
+        function sendMessage() {
             const inp = document.getElementById('type-input');
-            if(!inp.value.trim()) return;
+            if (!inp.value.trim() || !socket) return;
             socket.emit('chatMessage', { user: currentUser, text: inp.value });
             inp.value = '';
+        }
+
+        function deleteChatToVault() {
+            if (confirm("Move current chat to Deleted Box vault?")) {
+                socket.emit('moveToDeletedBox');
+            }
+        }
+
+        function submitVaultPin() {
+            const pin = document.getElementById('vault-pin-input').value;
+            if (pin && socket) {
+                socket.emit('openDeletedBox', pin);
+            }
         }
     </script>
 </body>
