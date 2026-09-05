@@ -67,93 +67,59 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const masterProducts = [
-            { title: "Women Printed Anarkali Kurta", price: "₹349", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70" },
-            { title: "Men White Casual Sneakers", price: "₹499", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70" },
-            { title: "Wireless Bluetooth Earbuds", price: "₹1,299", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70" },
-            { title: "Floral Print Maxi Dress", price: "₹899", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70" },
-            { title: "Slim Fit Cotton Denim Jeans", price: "₹749", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70" },
-            { title: "Matte Longstay Lipstick", price: "₹299", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70" },
-            { title: "Bluetooth Smartwatch 1.83\"", price: "₹999", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70" },
-            { title: "Kanjivaram Silk Blend Saree", price: "₹549", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70" },
-            { title: "Men Pure Cotton Polo T-Shirt", price: "₹349", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=350&q=70" },
-            { title: "Water Resistant Laptop Backpack", price: "₹429", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70" },
-            { title: "Oversized Streetwear Hoodie", price: "₹599", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=350&q=70" },
-            { title: "High-Rise Workout Leggings", price: "₹399", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=350&q=70" },
-            { title: "Vintage UV Protected Sunglasses", price: "₹249", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70" },
-            { title: "Vitamin C Face Serum", price: "₹399", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=350&q=70" },
-            { title: "Semi-Stitched Lehenga Choli", price: "₹1,149", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=350&q=70" },
-            { title: "Men Solid Casual Shirt", price: "₹499", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=350&q=70" },
-            { title: "Insulated Water Bottle 1L", price: "₹449", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70" },
-            { title: "Block Heel Sandals", price: "₹649", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=350&q=70" },
-            { title: "Fast Charging Power Bank", price: "₹1,099", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70" },
-            { title: "Onion Hair Oil for Hair Fall", price: "₹249", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1608248597359-009772a806ff?w=350&q=70" },
-            
-            { title: "Traditional Gold Jewellery Set", price: "₹319", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=350&q=70" },
-            { title: "Sports Running Track Pants", price: "₹389", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=350&q=70" },
-            { title: "RGB Mechanical Gaming Keyboard", price: "₹1,499", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=350&q=70" },
-            { title: "Quilted Tote Shoulder Bag", price: "₹599", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=350&q=70" },
-            { title: "Lightweight Mesh Running Shoes", price: "₹599", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=350&q=70" },
-            { title: "Hyaluronic Acid Sunscreen SPF50", price: "₹349", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=350&q=70" },
-            { title: "Printed Double Bed Bedsheet", price: "₹399", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=350&q=70" },
-            { title: "Slim Fit Washed Cargo Pants", price: "₹799", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=350&q=70" },
-            { title: "Mini Portable Bluetooth Speaker", price: "₹699", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=350&q=70" },
-            { title: "Oxidised Tribal Choker Necklace", price: "₹199", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=350&q=70" },
-            { title: "Heavy Bass Wired Earphones", price: "₹199", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=350&q=70" },
-            { title: "Deep Hydration Body Lotion", price: "₹269", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=350&q=70" },
-            { title: "Ethnic Rayon Flared Palazzo", price: "₹249", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=350&q=70" },
-            { title: "Men Casual Slip-On Loafers", price: "₹549", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=350&q=70" },
-            { title: "Ultra Slim Silent Wireless Mouse", price: "₹349", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=350&q=70" },
-            { title: "Summer Casual A-Line Top", price: "₹329", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=350&q=70" },
-            { title: "Classic Leather Strap Watch", price: "₹699", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=350&q=70" },
-            { title: "Charcoal Deep Cleanse Face Wash", price: "₹189", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1556228722-d0b5d15c7e0c?w=350&q=70" },
-            { title: "Chiffon Daily Wear Saree", price: "₹389", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1610030469668-932ec596e761?w=350&q=70" },
-            { title: "Men Regular Fit Denim Jacket", price: "₹999", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=350&q=70" },
-
-            { title: "Multipurpose Kitchen Spice Rack", price: "₹499", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=350&q=70" },
-            { title: "High Ankle Canvas Boots", price: "₹799", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=350&q=70" },
-            { title: "Smudge-Proof Black Eyeliner", price: "₹199", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=350&q=70" },
-            { title: "Gym Vest Pack of 2", price: "₹299", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=350&q=70" },
-            { title: "Decorative LED Fairy Lights", price: "₹149", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=350&q=70" },
-            { title: "Embellished Velvet Party Clutch", price: "₹449", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=350&q=70" },
-            { title: "Men Formal Oxford Shoes", price: "₹899", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=350&q=70" },
-            { title: "Volumizing Waterproof Mascara", price: "₹289", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=350&q=70" },
-            { title: "Women Open Front Shrug", price: "₹319", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=350&q=70" },
-            { title: "Pure Copper Water Bottle", price: "₹599", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70" },
-            { title: "Georgette Floral Kurti", price: "₹399", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1609357602117-d7e7937d59fe?w=350&q=70" },
-            { title: "Canvas Walking Shoes", price: "₹449", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=350&q=70" },
-            { title: "Noise-Cancelling Headphones", price: "₹1,899", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=350&q=70" },
-            { title: "Boho Style Wrap Midi Dress", price: "₹999", source: "Myntra", link: "https://myntra.com", img: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=350&q=70" },
-            { title: "Stretchable Cotton Chinos", price: "₹799", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=350&q=70" },
-            { title: "Matte Finish Face Powder", price: "₹249", source: "Nykaa", link: "https://nykaa.com", img: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=350&q=70" },
-            { title: "Fitness Smart Band", price: "₹799", source: "Amazon", link: "https://amazon.in", img: "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=350&q=70" },
-            { title: "Designer Embroidered Saree", price: "₹799", source: "Meesho", link: "https://meesho.com", img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70" },
-            { title: "Fleece Hooded Sweatshirt", price: "₹699", source: "Ajio", link: "https://ajio.com", img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=350&q=70" },
-            { title: "Travel Duffel Bag", price: "₹699", source: "Flipkart", link: "https://flipkart.com", img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70" }
+        const uniqueProducts = [
+            { title: "Women Printed Anarkali Kurta", price: "₹349", source: "Meesho", link: "https://www.meesho.com/search?q=anarkali+kurta", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70" },
+            { title: "Men White Casual Sneakers", price: "₹499", source: "Flipkart", link: "https://www.flipkart.com/search?q=white+sneakers", img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70" },
+            { title: "Wireless Bluetooth Earbuds", price: "₹1,299", source: "Amazon", link: "https://www.amazon.in/s?k=wireless+earbuds", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&q=70" },
+            { title: "Floral Print Maxi Dress", price: "₹899", source: "Myntra", link: "https://www.myntra.com/maxi-dress", img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70" },
+            { title: "Slim Fit Cotton Denim Jeans", price: "₹749", source: "Ajio", link: "https://www.ajio.com/s/jeans", img: "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70" },
+            { title: "Matte Longstay Lipstick", price: "₹299", source: "Nykaa", link: "https://www.nykaa.com/search/result/?q=lipstick", img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70" },
+            { title: "Bluetooth Smartwatch 1.83\"", price: "₹999", source: "Amazon", link: "https://www.amazon.in/s?k=smartwatch", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70" },
+            { title: "Kanjivaram Silk Blend Saree", price: "₹549", source: "Meesho", link: "https://www.meesho.com/search?q=silk+saree", img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70" },
+            { title: "Men Pure Cotton Polo T-Shirt", price: "₹349", source: "Ajio", link: "https://www.ajio.com/s/polo-tshirt", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=350&q=70" },
+            { title: "Water Resistant Laptop Backpack", price: "₹429", source: "Flipkart", link: "https://www.flipkart.com/search?q=laptop+backpack", img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=350&q=70" },
+            { title: "Oversized Streetwear Hoodie", price: "₹599", source: "Amazon", link: "https://www.amazon.in/s?k=hoodie", img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=350&q=70" },
+            { title: "High-Rise Workout Leggings", price: "₹399", source: "Myntra", link: "https://www.myntra.com/leggings", img: "https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=350&q=70" },
+            { title: "Vintage UV Protected Sunglasses", price: "₹249", source: "Flipkart", link: "https://www.flipkart.com/search?q=sunglasses", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70" },
+            { title: "Vitamin C Face Serum", price: "₹399", source: "Nykaa", link: "https://www.nykaa.com/search/result/?q=vitamin+c+serum", img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=350&q=70" },
+            { title: "Semi-Stitched Lehenga Choli", price: "₹1,149", source: "Meesho", link: "https://www.meesho.com/search?q=lehenga", img: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=350&q=70" },
+            { title: "Men Solid Casual Shirt", price: "₹499", source: "Ajio", link: "https://www.ajio.com/s/casual-shirt", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=350&q=70" },
+            { title: "Insulated Water Bottle 1L", price: "₹449", source: "Amazon", link: "https://www.amazon.in/s?k=water+bottle", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=350&q=70" },
+            { title: "Block Heel Sandals", price: "₹649", source: "Myntra", link: "https://www.myntra.com/sandals", img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=350&q=70" },
+            { title: "Fast Charging Power Bank", price: "₹1,099", source: "Flipkart", link: "https://www.flipkart.com/search?q=power+bank", img: "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?w=350&q=70" },
+            { title: "Onion Hair Oil for Hair Fall", price: "₹249", source: "Nykaa", link: "https://www.nykaa.com/search/result/?q=hair+oil", img: "https://images.unsplash.com/photo-1608248597359-009772a806ff?w=350&q=70" },
+            { title: "Traditional Gold Jewellery Set", price: "₹319", source: "Meesho", link: "https://www.meesho.com/search?q=jewellery+set", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=350&q=70" },
+            { title: "Sports Running Track Pants", price: "₹389", source: "Ajio", link: "https://www.ajio.com/s/track-pants", img: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=350&q=70" },
+            { title: "RGB Mechanical Gaming Keyboard", price: "₹1,499", source: "Amazon", link: "https://www.amazon.in/s?k=gaming+keyboard", img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=350&q=70" },
+            { title: "Quilted Tote Shoulder Bag", price: "₹599", source: "Myntra", link: "https://www.myntra.com/handbags", img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=350&q=70" },
+            { title: "Lightweight Mesh Running Shoes", price: "₹599", source: "Flipkart", link: "https://www.flipkart.com/search?q=running+shoes", img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=350&q=70" },
+            { title: "Hyaluronic Acid Sunscreen SPF50", price: "₹349", source: "Nykaa", link: "https://www.nykaa.com/search/result/?q=sunscreen", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=350&q=70" },
+            { title: "Printed Double Bed Bedsheet", price: "₹399", source: "Meesho", link: "https://www.meesho.com/search?q=bedsheet", img: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=350&q=70" },
+            { title: "Slim Fit Washed Cargo Pants", price: "₹799", source: "Ajio", link: "https://www.ajio.com/s/cargo-pants", img: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=350&q=70" },
+            { title: "Mini Portable Bluetooth Speaker", price: "₹699", source: "Amazon", link: "https://www.amazon.in/s?k=bluetooth+speaker", img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=350&q=70" },
+            { title: "Oxidised Tribal Choker Necklace", price: "₹199", source: "Myntra", link: "https://www.myntra.com/jewellery", img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=350&q=70" },
+            { title: "Heavy Bass Wired Earphones", price: "₹199", source: "Flipkart", link: "https://www.flipkart.com/search?q=earphones", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=350&q=70" },
+            { title: "Deep Hydration Body Lotion", price: "₹269", source: "Nykaa", link: "https://www.nykaa.com/search/result/?q=body+lotion", img: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=350&q=70" },
+            { title: "Ethnic Rayon Flared Palazzo", price: "₹249", source: "Meesho", link: "https://www.meesho.com/search?q=palazzo", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=350&q=70" },
+            { title: "Men Casual Slip-On Loafers", price: "₹549", source: "Ajio", link: "https://www.ajio.com/s/loafers", img: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=350&q=70" },
+            { title: "Ultra Slim Silent Wireless Mouse", price: "₹349", source: "Amazon", link: "https://www.amazon.in/s?k=wireless+mouse", img: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=350&q=70" },
+            { title: "Summer Casual A-Line Top", price: "₹329", source: "Myntra", link: "https://www.myntra.com/tops", img: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=350&q=70" },
+            { title: "Classic Leather Strap Watch", price: "₹699", source: "Flipkart", link: "https://www.flipkart.com/search?q=men+watch", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=350&q=70" },
+            { title: "Charcoal Deep Cleanse Face Wash", price: "₹189", source: "Nykaa", link: "https://www.nykaa.com/search/result/?q=face+wash", img: "https://images.unsplash.com/photo-1556228722-d0b5d15c7e0c?w=350&q=70" },
+            { title: "Chiffon Daily Wear Saree", price: "₹389", source: "Meesho", link: "https://www.meesho.com/search?q=chiffon+saree", img: "https://images.unsplash.com/photo-1610030469668-932ec596e761?w=350&q=70" },
+            { title: "Men Regular Fit Denim Jacket", price: "₹999", source: "Ajio", link: "https://www.ajio.com/s/denim-jacket", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=350&q=70" }
         ];
 
-        // Expands cleanly into 200+ unique products dynamically on every load without duplication
         function render() {
-            let fullList = [];
-            let modifiers = ["Elite ", "Premium ", "Classic ", "Signature ", "Modern ", "Urban "];
-            
-            masterProducts.forEach((p, index) => {
-                fullList.push(p);
-                // Create unique variations to scale up to 200+ items safely
-                modifiers.forEach((mod, mIdx) => {
-                    let newPrice = "₹" + (parseInt(p.price.replace(/[^\d]/g, '')) + (mIdx * 30));
-                    fullList.push({
-                        title: mod + p.title,
-                        price: newPrice,
-                        source: p.source,
-                        link: p.link,
-                        img: p.img
-                    });
-                });
+            // Ensure strict uniqueness by mapping unique titles using a Set filter
+            const seen = new Set();
+            const uniqueList = uniqueProducts.filter(p => {
+                if (seen.has(p.title)) return false;
+                seen.add(p.title);
+                return true;
             });
 
-            // Shuffle randomly so products change positions every time
-            const shuffled = fullList.sort(() => 0.5 - Math.random());
+            const shuffled = [...uniqueList].sort(() => 0.5 - Math.random());
             let html = '';
             shuffled.forEach(p => {
                 html += `<div class="card"><img src="${p.img}" loading="lazy"><div class="card-body"><div class="title">${p.title}</div><div class="price">${p.price}</div><a href="${p.link}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
