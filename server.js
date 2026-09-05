@@ -5,9 +5,7 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-    maxHttpBufferSize: 1e8
-});
+const io = new Server(server, { maxHttpBufferSize: 1e8 });
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -42,11 +40,25 @@ io.on('connection', (socket) => {
             text: data.text || '',
             fileType: data.fileType || null,
             fileData: data.fileData || null,
+            replyTo: data.replyTo || null,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             status: 'sent'
         };
         liveMessages.push(msg);
         io.emit('message', msg);
+    });
+
+    socket.on('editMessage', (data) => {
+        const m = liveMessages.find(item => item.id === data.id);
+        if (m && m.user === data.user) {
+            m.text = data.newText;
+            io.emit('updateMessages', liveMessages);
+        }
+    });
+
+    socket.on('deleteMessage', (msgId) => {
+        liveMessages = liveMessages.filter(item => item.id !== msgId);
+        io.emit('updateMessages', liveMessages);
     });
 
     socket.on('markSeen', (username) => {
@@ -61,11 +73,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('callUser', (data) => {
-        socket.broadcast.emit('incomingCall', {
-            from: data.from,
-            signalData: data.signalData,
-            callType: data.callType
-        });
+        socket.broadcast.emit('incomingCall', { from: data.from, signalData: data.signalData, callType: data.callType });
     });
 
     socket.on('acceptCall', (data) => {
