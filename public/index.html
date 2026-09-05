@@ -1,104 +1,556 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TrendStore - Fashion & Lifestyle</title>
+    <meta name="theme-color" content="#9c27b0">
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-    maxHttpBufferSize: 1e7
-});
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"TrendStore - Online Shopping","short_name":"TrendStore","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#9c27b0","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3081/3081559.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://cdn-icons-png.flaticon.com/512/3081/3081559.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #111b21; color: #e9edef; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
 
-// Deleted Vault Access PIN
-const VAULT_PIN = "1717";
+        #shop-view { width: 100%; max-width: 480px; background: #fff; min-height: 100vh; padding-bottom: 40px; color: #222; }
+        .top-navbar { background: #9c27b0; color: #fff; padding: 12px 14px; position: sticky; top: 0; z-index: 50; }
+        .brand-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .brand-name { font-size: 19px; font-weight: 800; }
+        .nav-icons span { margin-left: 14px; font-size: 18px; cursor: pointer; }
 
-let liveMessages = [];
-let deletedMessages = [];
+        .search-wrap { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 10px 42px 10px 14px; border-radius: 8px; border: none; outline: none; font-size: 14px; color: #333; background: #fff; }
+        .search-icon-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 18px; cursor: pointer; color: #555; }
 
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    if (username && password) {
-        return res.json({ success: true });
-    }
-    return res.status(400).json({ success: false, message: 'Invalid credentials' });
-});
+        .promo-banner { background: linear-gradient(135deg, #f80759, #bc4e9c); color: #fff; padding: 14px; text-align: center; }
+        .promo-banner h3 { font-size: 15px; margin-bottom: 3px; font-weight: 700; }
+        .promo-banner p { font-size: 11px; opacity: 0.95; }
 
-io.on('connection', (socket) => {
-    let activeUser = '';
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px; }
+        .card { background: #fff; border-radius: 8px; border: 1px solid #eaeaea; overflow: hidden; display: flex; flex-direction: column; }
+        .card-img-wrap { position: relative; width: 100%; height: 160px; background: #fafafa; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
+        .source-tag { position: absolute; bottom: 6px; left: 6px; color: #fff; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
+        
+        .tag-meesho { background: #ff4757; }
+        .tag-flipkart { background: #2874f0; }
+        .tag-amazon { background: #ff9900; color: #111 !important; }
+        .tag-myntra { background: #ff3f6c; }
+        .tag-ajio { background: #2c4152; }
+        .tag-nykaa { background: #fc2779; }
 
-    socket.on('joinRoom', (username) => {
-        activeUser = username;
-        io.emit('userStatus', { user: activeUser, status: 'Online' });
-        socket.emit('initialLiveMessages', liveMessages);
-    });
+        .card-body { padding: 8px; display: flex; flex-direction: column; flex: 1; }
+        .card-title { font-size: 12px; font-weight: 500; color: #333; margin-bottom: 6px; height: 32px; overflow: hidden; line-height: 1.3; }
+        .price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+        .price { font-size: 14px; font-weight: bold; color: #222; }
+        .old-price { font-size: 11px; text-decoration: line-through; color: #888; }
+        .buy-link-btn { margin-top: auto; display: block; text-decoration: none; padding: 7px 0; background: #fdf2fe; border: 1px solid #9c27b0; border-radius: 6px; font-size: 11px; font-weight: bold; color: #9c27b0; text-align: center; }
 
-    socket.on('chatMessage', (data) => {
-        const msg = {
-            id: 'msg_' + Date.now(),
-            user: data.user,
-            text: data.text || '',
-            fileType: data.fileType || null,
-            fileData: data.fileData || null,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            status: 'sent'
-        };
-        liveMessages.push(msg);
-        io.emit('message', msg);
-    });
+        #login-section { display: none; background: #1f2c34; padding: 25px; border-radius: 10px; width: 90%; max-width: 340px; margin-top: 20vh; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        #login-section h2 { font-size: 16px; text-align: center; margin-bottom: 15px; color: #00a884; }
+        input.auth-input { width: 100%; padding: 12px; margin: 8px 0; background: #2a3942; border: 1px solid #33444d; color: #fff; border-radius: 6px; outline: none; font-size: 14px; }
+        button.auth-btn { width: 100%; padding: 12px; background: #00a884; border: none; color: #fff; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 8px; }
 
-    socket.on('markSeen', (username) => {
-        liveMessages.forEach(m => {
-            if (m.user !== username) m.status = 'seen';
-        });
-        io.emit('seenUpdate');
-    });
+        #chat-section { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; background: #0b141a; position: relative; }
+        .wa-header { height: 60px; background: #202c33; display: flex; align-items: center; padding: 0 10px; gap: 10px; border-bottom: 1px solid #2a3942; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #6a7f8a; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #fff; }
+        .peer-info { flex: 1; }
+        .peer-name { font-size: 16px; font-weight: 600; color: #e9edef; }
+        .peer-status { font-size: 11px; color: #8696a0; height: 14px; }
+        .wa-actions { display: flex; align-items: center; gap: 6px; }
+        .wa-btn { background: none; border: none; font-size: 18px; color: #aebac1; cursor: pointer; padding: 6px; }
 
-    socket.on('typing', (data) => {
-        socket.broadcast.emit('typing', data);
-    });
+        #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background-image: radial-gradient(#182229 10%, transparent 11%); background-size: 18px 18px; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 78%; }
+        .msg-wrapper.me { align-self: flex-end; }
+        .msg-wrapper.other { align-self: flex-start; }
+        .msg-bubble { padding: 6px 9px 4px 9px; border-radius: 8px; font-size: 14.2px; line-height: 1.35; word-break: break-word; position: relative; }
+        .me .msg-bubble { background: #005c4b; color: #e9edef; border-top-right-radius: 0; }
+        .other .msg-bubble { background: #202c33; color: #e9edef; border-top-left-radius: 0; }
 
-    socket.on('callUser', (data) => {
-        socket.broadcast.emit('incomingCall', {
-            from: data.from,
-            signal: data.signalData,
-            callType: data.callType
-        });
-    });
+        .meta-row { display: flex; align-items: center; justify-content: flex-end; gap: 3px; margin-top: 2px; font-size: 10px; color: #8696a0; }
+        .tick { font-size: 13px; color: #8696a0; }
+        .tick.seen { color: #53bdeb; }
 
-    socket.on('acceptCall', (data) => {
-        socket.broadcast.emit('callAccepted', data.signal);
-    });
+        .chat-footer { padding: 6px 8px; background: #202c33; display: flex; align-items: center; gap: 6px; }
+        .wa-input-pill { flex: 1; background: #2a3942; border-radius: 24px; display: flex; align-items: center; padding: 4px 12px; }
+        .wa-input-pill input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 15px; padding: 6px 0; }
+        .send-round-btn { width: 42px; height: 42px; background: #00a884; border-radius: 50%; border: none; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; cursor: pointer; }
 
-    socket.on('endCallSignal', () => {
-        socket.broadcast.emit('callEnded');
-    });
+        #pin-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; }
+        .modal-box { background: #202c33; border-radius: 12px; padding: 22px; width: 85%; max-width: 320px; text-align: center; }
+        .modal-box h3 { font-size: 16px; margin-bottom: 12px; color: #00a884; }
 
-    socket.on('moveToDeletedBox', () => {
-        if (liveMessages.length > 0) {
-            deletedMessages.push(...liveMessages);
-            liveMessages = [];
-            io.emit('liveChatCleared');
+        #deleted-box-view { display: none; position: fixed; inset: 0; background: #0b141a; z-index: 150; flex-direction: column; }
+        .deleted-box-header { height: 60px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid #2a3942; }
+        .deleted-box-title { font-size: 16px; font-weight: bold; color: #e9edef; display: flex; align-items: center; gap: 6px; }
+        #deleted-messages-list { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+
+        #call-screen { display: none; position: fixed; inset: 0; background: #0b141a; z-index: 200; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 10px 40px; }
+        .call-video-container { position: relative; width: 100%; max-width: 450px; flex: 1; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        #remote-video { width: 100%; height: 100%; object-fit: cover; }
+        #local-video { position: absolute; right: 12px; top: 12px; width: 100px; height: 130px; object-fit: cover; border-radius: 8px; border: 2px solid #00a884; background: #222; }
+        .call-status-label { color: #8696a0; font-size: 14px; margin-top: 15px; }
+        .call-controls { display: flex; gap: 16px; margin-top: 20px; align-items: center; }
+        .ctrl-btn { width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; color: #fff; background: #2a3942; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .ctrl-btn.off { background: #ff9800; color: #111; }
+        .end-call-btn { width: 56px; height: 56px; border-radius: 50%; background: #ea0038; border: none; font-size: 22px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; }
+
+        #incoming-modal { display: none; position: fixed; top: 20px; width: 90%; max-width: 400px; background: #202c33; border-radius: 12px; padding: 14px; z-index: 250; box-shadow: 0 5px 20px rgba(0,0,0,0.6); align-items: center; justify-content: space-between; }
+        .incoming-text { font-size: 14px; font-weight: bold; color: #00a884; }
+    </style>
+</head>
+<body>
+
+    <input type="file" id="media-input" accept="image/*" style="display:none;" onchange="uploadImage(event)">
+
+    <div id="incoming-modal">
+        <div>
+            <div class="incoming-text" id="incoming-caller">Incoming Call...</div>
+            <div style="font-size:11px; color:#8696a0;">Secure Stream Connecting</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="acceptIncoming()" style="background:#00a884; border:none; padding:8px 14px; color:#fff; border-radius:6px; font-weight:bold; cursor:pointer;">Accept</button>
+            <button onclick="rejectIncoming()" style="background:#ea0038; border:none; padding:8px 14px; color:#fff; border-radius:6px; font-weight:bold; cursor:pointer;">Decline</button>
+        </div>
+    </div>
+
+    <div id="call-screen">
+        <div class="call-status-label" id="call-label">Encrypted Call...</div>
+        <div class="call-video-container">
+            <video id="remote-video" autoplay playsinline></video>
+            <video id="local-video" autoplay playsinline muted></video>
+        </div>
+        <div class="call-controls">
+            <button id="mic-toggle-btn" class="ctrl-btn" onclick="toggleAudio()" title="Mute/Unmute Mic">🎙️</button>
+            <button id="cam-toggle-btn" class="ctrl-btn" onclick="toggleVideo()" title="Camera On/Off">📷</button>
+            <button class="end-call-btn" onclick="hangUp()" title="End Call">📴</button>
+        </div>
+    </div>
+
+    <div id="pin-modal">
+        <div class="modal-box">
+            <h3>Secret Deleted Vault</h3>
+            <p style="font-size: 12px; color: #8696a0; margin-bottom: 10px;">Enter PIN to view deleted communication</p>
+            <input type="password" id="vault-pin-input" class="auth-input" placeholder="Enter Vault PIN">
+            <button class="auth-btn" onclick="submitVaultPin()">Open Deleted Box</button>
+            <button class="auth-btn" style="background: #39444d; margin-top: 6px;" onclick="closePinModal()">Cancel</button>
+            <p id="pin-err" style="color: #ff5252; font-size: 11px; margin-top: 8px;"></p>
+        </div>
+    </div>
+
+    <div id="deleted-box-view">
+        <div class="deleted-box-header">
+            <div class="deleted-box-title">🗑️ Deleted Messages Vault</div>
+            <button class="wa-btn" style="font-size: 14px; background: #00a884; color: #fff; padding: 6px 12px; border-radius: 4px;" onclick="closeDeletedBox()">Back to Chat</button>
+        </div>
+        <div id="deleted-messages-list"></div>
+    </div>
+
+    <div id="shop-view">
+        <div class="top-navbar">
+            <div class="brand-row">
+                <span class="brand-name">TrendStore</span>
+                <div class="nav-icons">
+                    <span title="Offers">🏷️</span>
+                    <span title="Cart">🛒</span>
+                </div>
+            </div>
+            <form onsubmit="handleTrigger(event)">
+                <div class="search-wrap">
+                    <input type="text" id="store-search" class="search-input" placeholder="Search Sarees, Kurtis, Shoes, Hoodies..." autocomplete="off">
+                    <button type="submit" class="search-icon-btn">🔍</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="promo-banner">
+            <h3>Mega Clearance Festival 🔥</h3>
+            <p>Lowest Price Guaranteed • Free Cash on Delivery</p>
+        </div>
+
+        <div class="product-grid" id="product-container"></div>
+    </div>
+
+    <div id="login-section">
+        <h2>WhatsApp Secure Sign-in</h2>
+        <input type="text" id="user-input" class="auth-input" placeholder="Your Name / ID">
+        <input type="password" id="pass-input" class="auth-input" placeholder="Password">
+        <button class="auth-btn" onclick="startSession()">Login</button>
+    </div>
+
+    <div id="chat-section">
+        <div class="wa-header">
+            <div class="avatar" id="avatar-icon">U</div>
+            <div class="peer-info">
+                <div class="peer-name" id="chat-title">Chat Room</div>
+                <div class="peer-status" id="status-display">online</div>
+            </div>
+            <div class="wa-actions">
+                <button class="wa-btn" title="Audio Stream" onclick="startCall('audio')">🎧</button>
+                <button class="wa-btn" title="Media Stream" onclick="startCall('video')">🖼️</button>
+                <button class="wa-btn" title="Move to Deleted Box" onclick="deleteChatToVault()">🗑️</button>
+                <button class="wa-btn" title="Open Deleted Box (PIN: 1717)" onclick="openPinModal()">📂</button>
+                <button class="wa-btn" title="Exit" onclick="location.reload()">✖</button>
+            </div>
+        </div>
+
+        <div id="messages"></div>
+
+        <div class="chat-footer">
+            <div class="wa-input-pill">
+                <button class="wa-btn" onclick="document.getElementById('media-input').click()" style="padding: 0 4px;">📎</button>
+                <input type="text" id="type-input" placeholder="Message" oninput="sendTyping()" onkeypress="if(event.key==='Enter') sendMessage()">
+            </div>
+            <button class="send-round-btn" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const baseCatalog = [
+            { title: "Women Printed Rayon Anarkali Kurta", price: "₹349", old: "₹899", source: "Meesho", class: "tag-meesho", link: "https://www.meesho.com/search?q=anarkali+kurta", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=350&q=70" },
+            { title: "Men White Casual Lightweight Sneakers", price: "₹499", old: "₹1,299", source: "Flipkart", class: "tag-flipkart", link: "https://www.flipkart.com/search?q=white+sneakers", img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=350&q=70" },
+            { title: "Wireless Bluetooth Earbuds with ANC", price: "₹1,299", old: "₹3,999", source: "Amazon", class: "tag-amazon", link: "https://www.amazon.in/s?k=wireless+earbuds", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=350&q=70" },
+            { title: "Floral Print Georgette Maxi Dress", price: "₹899", old: "₹2,499", source: "Myntra", class: "tag-myntra", link: "https://www.myntra.com/maxi-dress", img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=350&q=70" },
+            { title: "Slim Fit Cotton Denim Jeans", price: "₹749", old: "₹1,999", source: "Ajio", class: "tag-ajio", link: "https://www.ajio.com/s/jeans", img: "https://images.unsplash.com/photo-1542272604-780c96856592?auto=format&fit=crop&w=350&q=70" },
+            { title: "Matte Liquid Longstay Lipstick", price: "₹299", old: "₹650", source: "Nykaa", class: "tag-nykaa", link: "https://www.nykaa.com/search/result/?q=lipstick", img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=350&q=70" },
+            { title: "Bluetooth Calling Smartwatch 1.83\"", price: "₹999", old: "₹2,999", source: "Amazon", class: "tag-amazon", link: "https://www.amazon.in/s?k=smartwatch", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=350&q=70" },
+            { title: "Kanjivaram Silk Blend Woven Saree", price: "₹549", old: "₹1,799", source: "Meesho", class: "tag-meesho", link: "https://www.meesho.com/search?q=silk+saree", img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=350&q=70" },
+            { title: "Men Pure Cotton Casual Polo T-Shirt", price: "₹349", old: "₹899", source: "Ajio", class: "tag-ajio", link: "https://www.ajio.com/s/polo-tshirt", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=350&q=70" },
+            { title: "Water Resistant Laptop Backpack 30L", price: "₹429", old: "₹1,199", source: "Flipkart", class: "tag-flipkart", link: "https://www.flipkart.com/search?q=laptop+backpack", img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=350&q=70" }
+        ];
+
+        function render50Products() {
+            const grid = document.getElementById('product-container');
+            let fullList = [];
+            for (let i = 0; i < 5; i++) {
+                baseCatalog.forEach((item) => {
+                    fullList.push({
+                        ...item,
+                        title: i > 0 ? `${item.title} (Vol ${i + 1})` : item.title
+                    });
+                });
+            }
+
+            let html = '';
+            fullList.forEach(p => {
+                html += `
+                    <div class="card">
+                        <div class="card-img-wrap">
+                            <img src="${p.img}" alt="${p.title}" loading="lazy">
+                            <span class="source-tag ${p.class}">${p.source}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">${p.title}</div>
+                            <div class="price-row">
+                                <span class="price">${p.price}</span>
+                                <span class="old-price">${p.old}</span>
+                            </div>
+                            <a href="${p.link}" target="_blank" class="buy-link-btn">Buy on ${p.source} ↗</a>
+                        </div>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
         }
-    });
+        render50Products();
 
-    socket.on('openDeletedBox', (pin) => {
-        if (pin === VAULT_PIN) {
-            socket.emit('deletedBoxData', deletedMessages);
-        } else {
-            socket.emit('vaultError', 'Galat PIN! Access Denied.');
+        function handleTrigger(e) {
+            e.preventDefault();
+            const val = document.getElementById('store-search').value.trim().toLowerCase();
+            if (val === 't9') {
+                document.getElementById('shop-view').style.display = 'none';
+                document.getElementById('login-section').style.display = 'block';
+            } else if (val) {
+                window.open('https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(val), '_blank');
+            }
         }
-    });
 
-    socket.on('disconnect', () => {
-        if (activeUser) {
-            io.emit('userStatus', { user: activeUser, status: 'Offline' });
-            io.emit('callEnded');
+        let socket, currentUser = '';
+        let localStream, peerConn, pendingSignal;
+        let isAudioMuted = false, isVideoOff = false;
+
+        async function startSession() {
+            const u = document.getElementById('user-input').value.trim();
+            const p = document.getElementById('pass-input').value.trim();
+            if (!u || !p) return;
+
+            currentUser = u;
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('chat-section').style.display = 'flex';
+            document.getElementById('avatar-icon').innerText = u.charAt(0).toUpperCase();
+            document.getElementById('chat-title').innerText = u;
+
+            initSocket();
         }
-    });
-});
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+        function initSocket() {
+            socket = io();
+            socket.emit('joinRoom', currentUser);
+            socket.emit('markSeen', currentUser);
+
+            socket.on('initialLiveMessages', (list) => {
+                document.getElementById('messages').innerHTML = '';
+                list.forEach(m => renderBubble(m, 'messages'));
+            });
+
+            socket.on('message', (msg) => {
+                renderBubble(msg, 'messages');
+                if (msg.user !== currentUser) socket.emit('markSeen', currentUser);
+            });
+
+            socket.on('typing', (data) => {
+                if (data.user !== currentUser) {
+                    document.getElementById('status-display').innerText = data.isTyping ? 'typing...' : 'online';
+                }
+            });
+
+            socket.on('seenUpdate', () => {
+                document.querySelectorAll('.tick').forEach(t => {
+                    t.innerText = '✓✓';
+                    t.classList.add('seen');
+                });
+            });
+
+            socket.on('liveChatCleared', () => {
+                document.getElementById('messages').innerHTML = '';
+            });
+
+            socket.on('deletedBoxData', (list) => {
+                closePinModal();
+                const container = document.getElementById('deleted-messages-list');
+                container.innerHTML = '';
+                if (list.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; color:#8696a0; margin-top:20px;">Koi deleted messages nahi hain.</div>';
+                } else {
+                    list.forEach(m => renderBubble(m, 'deleted-messages-list'));
+                }
+                document.getElementById('deleted-box-view').style.display = 'flex';
+            });
+
+            socket.on('vaultError', (err) => {
+                document.getElementById('pin-err').innerText = err;
+            });
+
+            socket.on('incomingCall', (data) => {
+                pendingSignal = data.signal;
+                document.getElementById('incoming-caller').innerText = `${data.from} calling (${data.callType})...`;
+                document.getElementById('incoming-modal').style.display = 'flex';
+            });
+
+            socket.on('callAccepted', (signal) => {
+                if (peerConn) peerConn.setRemoteDescription(new RTCSessionDescription(signal));
+            });
+
+            socket.on('callEnded', () => {
+                closeCallUI();
+            });
+        }
+
+        function renderBubble(msg, containerId) {
+            const isMe = msg.user === currentUser;
+            const wrap = document.createElement('div');
+            wrap.className = `msg-wrapper ${isMe ? 'me' : 'other'}`;
+
+            let mediaPart = '';
+            if (msg.fileData) {
+                mediaPart = `<img src="${msg.fileData}" style="max-width:220px; border-radius:6px; margin-bottom:4px; display:block;">`;
+            }
+
+            const tickHtml = isMe ? `<span class="tick ${msg.status === 'seen' ? 'seen' : ''}">${msg.status === 'seen' ? '✓✓' : '✓'}</span>` : '';
+
+            wrap.innerHTML = `
+                <div class="msg-bubble">
+                    ${mediaPart}
+                    <div>${msg.text}</div>
+                    <div class="meta-row">
+                        <span>${msg.time}</span>
+                        ${tickHtml}
+                    </div>
+                </div>
+            `;
+            const box = document.getElementById(containerId);
+            box.appendChild(wrap);
+            wrap.scrollIntoView();
+        }
+
+        function sendMessage() {
+            const inp = document.getElementById('type-input');
+            if (!inp.value.trim() || !socket) return;
+            socket.emit('chatMessage', { user: currentUser, text: inp.value });
+            inp.value = '';
+            socket.emit('typing', { user: currentUser, isTyping: false });
+        }
+
+        let typeTimer;
+        function sendTyping() {
+            socket.emit('typing', { user: currentUser, isTyping: true });
+            clearTimeout(typeTimer);
+            typeTimer = setTimeout(() => {
+                socket.emit('typing', { user: currentUser, isTyping: false });
+            }, 1000);
+        }
+
+        function uploadImage(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                socket.emit('chatMessage', {
+                    user: currentUser,
+                    text: '',
+                    fileType: 'image',
+                    fileData: evt.target.result
+                });
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        function deleteChatToVault() {
+            if (confirm("Live screen se saaf karke Deleted Box me daal dein?")) {
+                socket.emit('moveToDeletedBox');
+            }
+        }
+
+        function openPinModal() {
+            document.getElementById('vault-pin-input').value = '';
+            document.getElementById('pin-err').innerText = '';
+            document.getElementById('pin-modal').style.display = 'flex';
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal').style.display = 'none';
+        }
+
+        function submitVaultPin() {
+            const pin = document.getElementById('vault-pin-input').value;
+            if (pin && socket) {
+                socket.emit('openDeletedBox', pin);
+            }
+        }
+
+        function closeDeletedBox() {
+            document.getElementById('deleted-box-view').style.display = 'none';
+        }
+
+        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+        async function startCall(callType) {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: callType === 'video',
+                    audio: true
+                });
+                document.getElementById('local-video').srcObject = localStream;
+                document.getElementById('call-screen').style.display = 'flex';
+                document.getElementById('call-label').innerText = callType === 'video' ? 'Connecting Media...' : 'Connecting Audio...';
+
+                resetMediaControlState();
+
+                peerConn = new RTCPeerConnection(rtcConfig);
+                localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
+
+                peerConn.ontrack = (e) => {
+                    document.getElementById('remote-video').srcObject = e.streams[0];
+                };
+
+                const offer = await peerConn.createOffer();
+                await peerConn.setLocalDescription(offer);
+
+                socket.emit('callUser', {
+                    from: currentUser,
+                    signalData: offer,
+                    callType: callType
+                });
+            } catch (err) {
+                alert('Microphone/Camera permission required.');
+            }
+        }
+
+        async function acceptIncoming() {
+            document.getElementById('incoming-modal').style.display = 'none';
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('local-video').srcObject = localStream;
+                document.getElementById('call-screen').style.display = 'flex';
+
+                resetMediaControlState();
+
+                peerConn = new RTCPeerConnection(rtcConfig);
+                localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
+
+                peerConn.ontrack = (e) => {
+                    document.getElementById('remote-video').srcObject = e.streams[0];
+                };
+
+                await peerConn.setRemoteDescription(new RTCSessionDescription(pendingSignal));
+                const answer = await peerConn.createAnswer();
+                await peerConn.setLocalDescription(answer);
+
+                socket.emit('acceptCall', { signal: answer });
+            } catch (err) {
+                alert('Call connection failed');
+            }
+        }
+
+        function toggleAudio() {
+            if (!localStream) return;
+            const audioTrack = localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                isAudioMuted = !isAudioMuted;
+                audioTrack.enabled = !isAudioMuted;
+                const btn = document.getElementById('mic-toggle-btn');
+                btn.innerText = isAudioMuted ? '🔇' : '🎙️';
+                btn.classList.toggle('off', isAudioMuted);
+            }
+        }
+
+        function toggleVideo() {
+            if (!localStream) return;
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (videoTrack) {
+                isVideoOff = !isVideoOff;
+                videoTrack.enabled = !isVideoOff;
+                const btn = document.getElementById('cam-toggle-btn');
+                btn.innerText = isVideoOff ? '🚫' : '📷';
+                btn.classList.toggle('off', isVideoOff);
+            }
+        }
+
+        function resetMediaControlState() {
+            isAudioMuted = false;
+            isVideoOff = false;
+            const micBtn = document.getElementById('mic-toggle-btn');
+            const camBtn = document.getElementById('cam-toggle-btn');
+            if (micBtn) { micBtn.innerText = '🎙️'; micBtn.classList.remove('off'); }
+            if (camBtn) { camBtn.innerText = '📷'; camBtn.classList.remove('off'); }
+        }
+
+        function rejectIncoming() {
+            document.getElementById('incoming-modal').style.display = 'none';
+            socket.emit('endCallSignal');
+        }
+
+        function hangUp() {
+            if (socket) socket.emit('endCallSignal');
+            closeCallUI();
+        }
+
+        function closeCallUI() {
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+            }
+            if (peerConn) {
+                peerConn.close();
+                peerConn = null;
+            }
+            document.getElementById('call-screen').style.display = 'none';
+            document.getElementById('incoming-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
