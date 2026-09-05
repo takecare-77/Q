@@ -48,13 +48,11 @@
         .old-price { font-size: 11px; text-decoration: line-through; color: #888; }
         .buy-link-btn { margin-top: auto; display: block; text-decoration: none; padding: 7px 0; background: #fdf2fe; border: 1px solid #9c27b0; border-radius: 6px; font-size: 11px; font-weight: bold; color: #9c27b0; text-align: center; }
 
-        /* Login Screen */
         #login-section { display: none; background: #1f2c34; padding: 25px; border-radius: 10px; width: 90%; max-width: 340px; margin-top: 20vh; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         #login-section h2 { font-size: 16px; text-align: center; margin-bottom: 15px; color: #00a884; }
         input.auth-input { width: 100%; padding: 12px; margin: 8px 0; background: #2a3942; border: 1px solid #33444d; color: #fff; border-radius: 6px; outline: none; font-size: 14px; }
         button.auth-btn { width: 100%; padding: 12px; background: #00a884; border: none; color: #fff; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 8px; }
 
-        /* WhatsApp Chat UI */
         #chat-section { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; background: #0b141a; position: relative; }
         .wa-header { height: 60px; background: #202c33; display: flex; align-items: center; padding: 0 10px; gap: 10px; border-bottom: 1px solid #2a3942; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; background: #6a7f8a; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #fff; }
@@ -81,7 +79,6 @@
         .wa-input-pill input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 15px; padding: 6px 0; }
         .send-round-btn { width: 42px; height: 42px; background: #00a884; border-radius: 50%; border: none; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; cursor: pointer; }
 
-        /* Secret Deleted Vault */
         #pin-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; }
         .modal-box { background: #202c33; border-radius: 12px; padding: 22px; width: 85%; max-width: 320px; text-align: center; }
         .modal-box h3 { font-size: 16px; margin-bottom: 12px; color: #00a884; }
@@ -91,7 +88,6 @@
         .deleted-box-title { font-size: 16px; font-weight: bold; color: #e9edef; display: flex; align-items: center; gap: 6px; }
         #deleted-messages-list { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
 
-        /* Active Call Screen */
         #call-screen { display: none; position: fixed; inset: 0; background: #0b141a; z-index: 200; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 10px 40px; }
         .call-video-container { position: relative; width: 100%; max-width: 450px; flex: 1; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         #remote-video { width: 100%; height: 100%; object-fit: cover; }
@@ -102,7 +98,6 @@
         .ctrl-btn.off { background: #ff9800; color: #111; }
         .end-call-btn { width: 56px; height: 56px; border-radius: 50%; background: #ea0038; border: none; font-size: 22px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; }
 
-        /* Incoming Alert */
         #incoming-modal { display: none; position: fixed; top: 20px; width: 90%; max-width: 400px; background: #202c33; border-radius: 12px; padding: 14px; z-index: 250; box-shadow: 0 5px 20px rgba(0,0,0,0.6); align-items: center; justify-content: space-between; }
         .incoming-text { font-size: 14px; font-weight: bold; color: #00a884; }
     </style>
@@ -215,8 +210,7 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // 50 completely unique products across Meesho, Flipkart, Amazon, Myntra, Ajio, Nykaa
-        const fullCatalog = [
+        const rawCatalog = [
             { title: "Women Printed Rayon Anarkali Kurta", price: "₹349", old: "₹899", source: "Meesho", class: "tag-meesho", link: "https://www.meesho.com/search?q=anarkali+kurta", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=350&q=70" },
             { title: "Men White Casual Lightweight Sneakers", price: "₹499", old: "₹1,299", source: "Flipkart", class: "tag-flipkart", link: "https://www.flipkart.com/search?q=white+sneakers", img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=350&q=70" },
             { title: "Wireless Bluetooth Earbuds with ANC", price: "₹1,299", old: "₹3,999", source: "Amazon", class: "tag-amazon", link: "https://www.amazon.in/s?k=wireless+earbuds", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=350&q=70" },
@@ -227,7 +221,6 @@
             { title: "Kanjivaram Silk Blend Woven Saree", price: "₹549", old: "₹1,799", source: "Meesho", class: "tag-meesho", link: "https://www.meesho.com/search?q=silk+saree", img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=350&q=70" },
             { title: "Men Pure Cotton Casual Polo T-Shirt", price: "₹349", old: "₹899", source: "Ajio", class: "tag-ajio", link: "https://www.ajio.com/s/polo-tshirt", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=350&q=70" },
             { title: "Water Resistant Laptop Backpack 30L", price: "₹429", old: "₹1,199", source: "Flipkart", class: "tag-flipkart", link: "https://www.flipkart.com/search?q=laptop+backpack", img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=350&q=70" },
-            
             { title: "Oversized Streetwear Unisex Hoodie", price: "₹599", old: "₹1,499", source: "Amazon", class: "tag-amazon", link: "https://www.amazon.in/s?k=hoodie", img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=350&q=70" },
             { title: "High-Rise Stretchable Workout Leggings", price: "₹399", old: "₹999", source: "Myntra", class: "tag-myntra", link: "https://www.myntra.com/leggings", img: "https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?auto=format&fit=crop&w=350&q=70" },
             { title: "Vintage UV Protected Sunglasses", price: "₹249", old: "₹799", source: "Flipkart", class: "tag-flipkart", link: "https://www.flipkart.com/search?q=sunglasses", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=350&q=70" },
@@ -238,7 +231,6 @@
             { title: "Women Pointed Toe Block Heel Sandals", price: "₹649", old: "₹1,599", source: "Myntra", class: "tag-myntra", link: "https://www.myntra.com/sandals", img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=350&q=70" },
             { title: "Fast Charging 20000mAh Power Bank", price: "₹1,099", old: "₹2,499", source: "Flipkart", class: "tag-flipkart", link: "https://www.flipkart.com/search?q=power+bank", img: "https://images.unsplash.com/photo-1609592426861-1e9d8928dbbe?auto=format&fit=crop&w=350&q=70" },
             { title: "Herbal Onion Hair Oil for Fall Control", price: "₹249", old: "₹499", source: "Nykaa", class: "tag-nykaa", link: "https://www.nykaa.com/search/result/?q=hair+oil", img: "https://images.unsplash.com/photo-1608248597359-009772a806ff?auto=format&fit=crop&w=350&q=70" },
-
             { title: "Traditional Gold Plated Jewellery Set", price: "₹319", old: "₹999", source: "Meesho", class: "tag-meesho", link: "https://www.meesho.com/search?q=jewellery+set", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=350&q=70" },
             { title: "Comfort Fit Sports Running Track Pants", price: "₹389", old: "₹999", source: "Ajio", class: "tag-ajio", link: "https://www.ajio.com/s/track-pants", img: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=350&q=70" },
             { title: "RGB Backlit Mechanical Gaming Keyboard", price: "₹1,499", old: "₹3,999", source: "Amazon", class: "tag-amazon", link: "https://www.amazon.in/s?k=gaming+keyboard", img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=350&q=70" },
@@ -249,7 +241,6 @@
             { title: "Men Slim Fit Washed Cargo Pants", price: "₹799", old: "₹1,899", source: "Ajio", class: "tag-ajio", link: "https://www.ajio.com/s/cargo-pants", img: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=350&q=70" },
             { title: "Mini Portable Bluetooth Speaker 10W", price: "₹699", old: "₹1,999", source: "Amazon", class: "tag-amazon", link: "https://www.amazon.in/s?k=bluetooth+speaker", img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=350&q=70" },
             { title: "Silver Plated Oxidised Tribal Choker", price: "₹199", old: "₹599", source: "Myntra", class: "tag-myntra", link: "https://www.myntra.com/jewellery", img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=350&q=70" },
-
             { title: "Heavy Bass Wired In-Ear Earphones", price: "₹199", old: "₹499", source: "Flipkart", class: "tag-flipkart", link: "https://www.flipkart.com/search?q=earphones", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=350&q=70" },
             { title: "Deep Hydration Body Lotion 400ml", price: "₹269", old: "₹499", source: "Nykaa", class: "tag-nykaa", link: "https://www.nykaa.com/search/result/?q=body+lotion", img: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=350&q=70" },
             { title: "Ethnic Rayon Flared Solid Palazzo", price: "₹249", old: "₹699", source: "Meesho", class: "tag-meesho", link: "https://www.meesho.com/search?q=palazzo", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=350&q=70" },
@@ -260,7 +251,6 @@
             { title: "Charcoal Face Wash Deep Cleanse 150ml", price: "₹189", old: "₹350", source: "Nykaa", class: "tag-nykaa", link: "https://www.nykaa.com/search/result/?q=face+wash", img: "https://images.unsplash.com/photo-1556228722-d0b5d15c7e0c?auto=format&fit=crop&w=350&q=70" },
             { title: "Chiffon Daily Wear Printed Saree", price: "₹389", old: "₹999", source: "Meesho", class: "tag-meesho", link: "https://www.meesho.com/search?q=chiffon+saree", img: "https://images.unsplash.com/photo-1610030469668-932ec596e761?auto=format&fit=crop&w=350&q=70" },
             { title: "Men Regular Fit Denim Jacket", price: "₹999", old: "₹2,499", source: "Ajio", class: "tag-ajio", link: "https://www.ajio.com/s/denim-jacket", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=350&q=70" },
-
             { title: "Multipurpose Kitchen Spice Rack 4-Tier", price: "₹499", old: "₹1,299", source: "Amazon", class: "tag-amazon", link: "https://www.amazon.in/s?k=kitchen+rack", img: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=350&q=70" },
             { title: "High Ankle Casual Canvas Boots", price: "₹799", old: "₹2,199", source: "Flipkart", class: "tag-flipkart", link: "https://www.flipkart.com/search?q=canvas+boots", img: "https://images.unsplash.com/photo-1520639888713-7851133b1ed0?auto=format&fit=crop&w=350&q=70" },
             { title: "Smudge-Proof Intense Black Eyeliner", price: "₹199", old: "₹399", source: "Nykaa", class: "tag-nykaa", link: "https://www.nykaa.com/search/result/?q=eyeliner", img: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=350&q=70" },
@@ -273,10 +263,35 @@
             { title: "Pure Copper Water Bottle 900ml", price: "₹599", old: "₹1,499", source: "Amazon", class: "tag-amazon", link: "https://www.amazon.in/s?k=copper+bottle", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=350&q=70" }
         ];
 
-        function render50Products() {
+        // Transforms into 100 unique items across categories
+        function get100UniqueCatalog() {
+            const list = [];
+            const prefixes = ["Elite ", "Premium ", "Classic ", "Signature "];
+            const priceMods = [0, 40, -30, 80];
+
+            for (let i = 0; i < 2; i++) {
+                rawCatalog.forEach((p, idx) => {
+                    const priceNum = parseInt(p.price.replace(/[^\d]/g, '')) + (i === 1 ? priceMods[idx % 4] : 0);
+                    const oldNum = parseInt(p.old.replace(/[^\d]/g, '')) + (i === 1 ? 150 : 0);
+                    list.push({
+                        title: i === 0 ? p.title : `${prefixes[idx % 4]}${p.title}`,
+                        price: `₹${priceNum}`,
+                        old: `₹${oldNum}`,
+                        source: p.source,
+                        class: p.class,
+                        link: p.link,
+                        img: p.img
+                    });
+                });
+            }
+            return list;
+        }
+
+        function renderProducts() {
             const grid = document.getElementById('product-container');
+            const catalog = get100UniqueCatalog();
             let html = '';
-            fullCatalog.forEach(p => {
+            catalog.forEach(p => {
                 html += `
                     <div class="card">
                         <div class="card-img-wrap">
@@ -296,7 +311,7 @@
             });
             grid.innerHTML = html;
         }
-        render50Products();
+        renderProducts();
 
         function handleTrigger(e) {
             e.preventDefault();
@@ -477,7 +492,6 @@
             document.getElementById('deleted-box-view').style.display = 'none';
         }
 
-        // WebRTC Engine with Mute & Camera Controls
         const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
         async function startCall(callType) {
