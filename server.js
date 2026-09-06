@@ -15,6 +15,7 @@ app.get('/', (req, res) => {
 });
 
 let liveMessages = [];
+let vaultHistory = [];
 
 const VALID_USERS = {
     "user1": "pass123",
@@ -35,7 +36,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('requestVaultHistory', () => {
-        socket.emit('vaultHistoryData', liveMessages);
+        socket.emit('vaultHistoryData', vaultHistory);
     });
 
     socket.on('chatMessage', (data) => {
@@ -54,8 +55,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('deleteMessage', (data) => {
-        liveMessages = liveMessages.filter(m => m.id !== data.id);
-        io.emit('messageDeleted', data.id);
+        const index = liveMessages.findIndex(m => m.id === data.id);
+        if (index !== -1) {
+            const deleted = liveMessages.splice(index, 1)[0];
+            vaultHistory.push(deleted); // Move to vault/deleted history box
+            io.emit('messageDeleted', data.id);
+        }
     });
 
     socket.on('editMessage', (data) => {
