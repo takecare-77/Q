@@ -187,7 +187,11 @@
             });
         }
 
-        loadProducts();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadProducts);
+        } else {
+            loadProducts();
+        }
 
         function handleSearch() {
             const query = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -348,4 +352,134 @@
                 let reactSpan = el.querySelector('.reaction-badge');
                 if (!reactSpan) {
                     reactSpan = document.createElement('div');
-                    react
+                    reactSpan.className = 'reaction-badge';
+                    reactSpan.style.cssText = "position:absolute; bottom:-8px; right:8px; background:#202c33; padding:2px 6px; border-radius:10px; font-size:12px;";
+                    el.appendChild(reactSpan);
+                }
+                reactSpan.innerText = data.reaction;
+            }
+        });
+
+        async function startCall(type) {
+            document.getElementById('callScreen').style.display = 'flex';
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: type === 'video', 
+                    audio: true 
+                });
+                document.getElementById('localVideo').srcObject = localStream;
+
+                peerConnection = new RTCPeerConnection(servers);
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                peerConnection.ontrack = (event) => {
+                    document.getElementById('remoteVideo').srcObject = event.streams[0];
+                };
+
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) socket.emit('candidate', event.candidate);
+                };
+
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                socket.emit('offer', offer);
+            } catch (error) {
+                alert('Camera/Microphone permission denied.');
+                endCall();
+            }
+        }
+
+        socket.on('offer', async (offer) => {
+            document.getElementById('callScreen').style.display = 'flex';
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('localVideo').srcObject = localStream;
+
+            peerConnection = new RTCPeerConnection(servers);
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.ontrack = (event) => {
+                document.getElementById('remoteVideo').srcObject = event.streams[0];
+            };
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) socket.emit('candidate', event.candidate);
+            };
+
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            socket.emit('answer', answer);
+        });
+
+        socket.on('answer', async (answer) => {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        });
+
+        socket.on('candidate', async (candidate) => {
+            if (peerConnection) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        });
+
+        function endCall() {
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            if (peerConnection) peerConnection.close();
+            document.getElementById('callScreen').style.display = 'none';
+        }
+
+        socket.on('message', (msg) => {
+            appendMessage(msg, 'messages');
+        });
+
+        socket.on('initialLiveMessages', (messages) => {
+            const msgContainer = document.getElementById('messages');
+            msgContainer.innerHTML = '';
+            messages.forEach(msg => appendMessage(msg, 'messages'));
+        });
+
+        socket.on('vaultHistoryData', (messages) => {
+            const vaultContainer = document.getElementById('vaultMessages');
+            vaultContainer.innerHTML = '';
+            if (messages.length === 0) {
+                vaultContainer.innerHTML = '<p style="color:#8696a0; text-align:center; margin-top:20px;">No deleted messages found.</p>';
+                return;
+            }
+            messages.forEach(msg => appendMessage(msg, 'vaultMessages'));
+        });
+
+        function appendMessage(msg, containerId) {
+            const targetContainer = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `msg ${msg.user === currentUser ? 'sent' : 'received'}`;
+            div.id = msg.id;
+            
+            div.onclick = () => showMessageOptions(msg.id, msg.user, msg.text);
+
+            let content = '';
+            if (msg.replyTo) {
+                content += `<div class="reply-quote">Replying to message</div>`;
+            }
+            content += `<b>${msg.user}</b><br>`;
+            if (msg.text) {
+                content += `<span class="msg-text">${msg.text}</span><br>`;
+            }
+            if (msg.fileType === 'image' && msg.fileData) {
+                content += `<img src="${msg.fileData}" alt="Image">`;
+            } else if (msg.fileType === 'video' && msg.fileData) {
+                content += `<video controls src="${msg.fileData}"></video>`;
+            }
+            
+            const ticks = msg.user === currentUser ? '<span style="color: #53bdeb; margin-left:4px;">✓✓</span>' : '';
+            content += `<div style="font-size:9px; float:right; color:#8696a0; margin-top:5px; margin-left:10px;">${msg.time} ${ticks}</div>`;
+            
+            if (msg.reaction) {
+                content += `<div class="reaction-badge" style="position:absolute; bottom:-8px; right:8px; background:#202c33; padding:2px 6px; border-radius:10px; font-size:12px;">${msg.reaction}</div>`;
+            }
+
+            div.innerHTML = content;
+            targetContainer.appendChild(div);
+            targetContainer.scrollTop = targetContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
