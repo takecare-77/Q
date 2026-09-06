@@ -45,13 +45,35 @@ io.on('connection', (socket) => {
             text: data.text || null,
             fileType: data.fileType || null,
             fileData: data.fileData || null,
+            replyTo: data.replyTo || null,
+            reaction: null,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         liveMessages.push(msg);
         io.emit('message', msg);
     });
 
-    // WebRTC Signaling for Calls
+    socket.on('deleteMessage', (data) => {
+        liveMessages = liveMessages.filter(m => m.id !== data.id);
+        io.emit('messageDeleted', data.id);
+    });
+
+    socket.on('editMessage', (data) => {
+        const msg = liveMessages.find(m => m.id === data.id);
+        if (msg) {
+            msg.text = data.newText;
+            io.emit('messageEdited', data);
+        }
+    });
+
+    socket.on('addReaction', (data) => {
+        const msg = liveMessages.find(m => m.id === data.id);
+        if (msg) {
+            msg.reaction = data.reaction;
+            io.emit('messageReaction', data);
+        }
+    });
+
     socket.on('offer', (data) => socket.broadcast.emit('offer', data));
     socket.on('answer', (data) => socket.broadcast.emit('answer', data));
     socket.on('candidate', (data) => socket.broadcast.emit('candidate', data));
