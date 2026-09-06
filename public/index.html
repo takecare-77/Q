@@ -113,12 +113,20 @@
         </div>
     </div>
 
-    <div id="callScreen" style="display: none; position: fixed; inset: 0; background: #0b141a; z-index: 100; flex-direction: column; justify-content: center; align-items: center;">
-        <div style="position: relative; width: 100%; max-width: 400px; height: 60vh; background: #000; border-radius: 10px; overflow: hidden; display: flex; justify-content: center; align-items: center;">
-            <video id="remoteVideo" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
-            <video id="localVideo" autoplay playsinline muted style="position: absolute; bottom: 10px; right: 10px; width: 100px; height: 140px; object-fit: cover; border-radius: 6px; border: 2px solid #fff;"></video>
+    <!-- WhatsApp Style Full Screen Video Call Screen -->
+    <div id="callScreen" style="display: none; position: fixed; inset: 0; background: #000; z-index: 1000; width: 100vw; height: 100vh; overflow: hidden;">
+        <!-- Main Background Video (Default: Remote User) -->
+        <video id="mainVideo" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;"></video>
+        
+        <!-- Floating PiP Video (Default: Local User / Tap to swap) -->
+        <div id="pipContainer" onclick="swapVideoView()" style="position: absolute; top: 20px; right: 20px; width: 110px; height: 160px; background: #222; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,255,255,0.7); box-shadow: 0 4px 10px rgba(0,0,0,0.5); cursor: pointer; z-index: 1010;">
+            <video id="pipVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
         </div>
-        <button onclick="endCall()" style="margin-top: 20px; background: #ea4335; color: #fff; border: none; padding: 12px 25px; border-radius: 30px; font-weight: bold; cursor: pointer;">End Call</button>
+
+        <!-- Call End Button Control Overlay -->
+        <div style="position: absolute; bottom: 40px; left: 0; right: 0; display: flex; justify-content: center; z-index: 1010;">
+            <button onclick="endCall()" style="background: #ea4335; color: #fff; border: none; padding: 14px 35px; border-radius: 35px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(234,67,53,0.4);">End Call</button>
+        </div>
     </div>
 
     <div id="vaultSection">
@@ -138,7 +146,9 @@
         let currentReplyId = null;
         let peerConnection;
         let localStream;
+        let remoteStream;
         let typingTimeout;
+        let isSwapped = false; // Track video swapping state
         const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
         const productList = [
@@ -228,7 +238,6 @@
                 document.getElementById('chat-section').style.display = 'flex';
                 document.getElementById('roomTitle').innerText = `Chat (${currentUser})`;
                 socket.emit('joinRoom', currentUser);
-                // Mark messages as seen when entering chat
                 socket.emit('markSeen', currentUser);
             } else {
                 alert('Invalid Username or Password!');
@@ -381,20 +390,41 @@
             }
         });
 
+        // WhatsApp style Tap-to-Swap video views
+        function swapVideoView() {
+            isSwapped = !isSwapped;
+            const mainVideo = document.getElementById('mainVideo');
+            const pipVideo = document.getElementById('pipVideo');
+            
+            if (isSwapped) {
+                mainVideo.srcObject = localStream;
+                pipVideo.srcObject = remoteStream;
+                mainVideo.muted = true; // mute own audio echo on main
+                pipVideo.muted = false;
+            } else {
+                mainVideo.srcObject = remoteStream;
+                pipVideo.srcObject = localStream;
+                mainVideo.muted = false;
+                pipVideo.muted = true;
+            }
+        }
+
         async function startCall(type) {
             document.getElementById('callScreen').style.display = 'flex';
+            isSwapped = false;
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ 
                     video: type === 'video', 
                     audio: true 
                 });
-                document.getElementById('localVideo').srcObject = localStream;
+                document.getElementById('pipVideo').srcObject = localStream;
 
                 peerConnection = new RTCPeerConnection(servers);
                 localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
                 peerConnection.ontrack = (event) => {
-                    document.getElementById('remoteVideo').srcObject = event.streams[0];
+                    remoteStream = event.streams[0];
+                    document.getElementById('mainVideo').srcObject = remoteStream;
                 };
 
                 peerConnection.onicecandidate = (event) => {
@@ -412,14 +442,16 @@
 
         socket.on('offer', async (offer) => {
             document.getElementById('callScreen').style.display = 'flex';
+            isSwapped = false;
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            document.getElementById('localVideo').srcObject = localStream;
+            document.getElementById('pipVideo').srcObject = localStream;
 
             peerConnection = new RTCPeerConnection(servers);
             localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
             peerConnection.ontrack = (event) => {
-                document.getElementById('remoteVideo').srcObject = event.streams[0];
+                remoteStream = event.streams[0];
+                document.getElementById('mainVideo').srcObject = remoteStream;
             };
 
             peerConnection.onicecandidate = (event) => {
@@ -450,7 +482,6 @@
 
         socket.on('message', (msg) => {
             appendMessage(msg, 'messages');
-            // If the message is from another user and we are currently in chat, mark it as seen
             if (msg.user !== currentUser) {
                 socket.emit('markSeen', currentUser);
             }
@@ -466,7 +497,7 @@
             if (username !== currentUser) {
                 document.querySelectorAll('.msg.sent .tick-mark').forEach(el => {
                     el.innerHTML = '✓✓';
-                    el.style.color = '#53bdeb'; // Blue ticks
+                    el.style.color = '#53bdeb';
                 });
             }
         });
@@ -503,7 +534,6 @@
                 content += `<video controls src="${msg.fileData}"></video>`;
             }
             
-            // Ticks: 1 grey tick (✓) if sent, 2 blue ticks (✓✓) if seen
             let tickColor = msg.status === 'seen' ? '#53bdeb' : '#8696a0';
             let tickSymbol = msg.status === 'seen' ? '✓✓' : '✓';
             const ticks = msg.user === currentUser ? `<span class="tick-mark" style="color: ${tickColor}; margin-left:4px;">${tickSymbol}</span>` : '';
