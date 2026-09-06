@@ -87,7 +87,10 @@
 
     <div id="chat-section">
         <div class="chat-header">
-            <span id="roomTitle">Secure Chat</span>
+            <div>
+                <span id="roomTitle">Secure Chat</span><br>
+                <span id="typingStatus" style="font-size: 11px; color: #00a884; font-weight: normal; display: none;">typing...</span>
+            </div>
             <div style="display: flex; gap: 12px; align-items: center;">
                 <span class="call-btn" onclick="startCall('video')" title="Video Call">📹</span>
                 <span class="call-btn" onclick="startCall('audio')" title="Voice Call">📞</span>
@@ -104,7 +107,7 @@
             <div class="footer-row">
                 <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;" onchange="handleMediaUpload(event)">
                 <button class="attach-btn" onclick="document.getElementById('mediaInput').click()">📎</button>
-                <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleChatKey(event)">
+                <input type="text" id="messageInput" placeholder="Type a message..." oninput="handleTyping()" onkeypress="handleChatKey(event)">
                 <button class="send-btn" onclick="sendMessage()">➤</button>
             </div>
         </div>
@@ -135,6 +138,7 @@
         let currentReplyId = null;
         let peerConnection;
         let localStream;
+        let typingTimeout;
         const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
         const productList = [
@@ -224,6 +228,8 @@
                 document.getElementById('chat-section').style.display = 'flex';
                 document.getElementById('roomTitle').innerText = `Chat (${currentUser})`;
                 socket.emit('joinRoom', currentUser);
+                // Mark messages as seen when entering chat
+                socket.emit('markSeen', currentUser);
             } else {
                 alert('Invalid Username or Password!');
             }
@@ -259,6 +265,21 @@
             }
             lastScrollTop = container.scrollTop;
         }
+
+        function handleTyping() {
+            socket.emit('typing', { user: currentUser });
+        }
+
+        socket.on('displayTyping', (data) => {
+            const typingStatus = document.getElementById('typingStatus');
+            typingStatus.innerText = `${data.user} is typing...`;
+            typingStatus.style.display = 'inline';
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                typingStatus.style.display = 'none';
+            }, 1500);
+        });
 
         function handleMediaUpload(event) {
             const file = event.target.files[0];
@@ -429,12 +450,25 @@
 
         socket.on('message', (msg) => {
             appendMessage(msg, 'messages');
+            // If the message is from another user and we are currently in chat, mark it as seen
+            if (msg.user !== currentUser) {
+                socket.emit('markSeen', currentUser);
+            }
         });
 
         socket.on('initialLiveMessages', (messages) => {
             const msgContainer = document.getElementById('messages');
             msgContainer.innerHTML = '';
             messages.forEach(msg => appendMessage(msg, 'messages'));
+        });
+
+        socket.on('messagesSeen', (username) => {
+            if (username !== currentUser) {
+                document.querySelectorAll('.msg.sent .tick-mark').forEach(el => {
+                    el.innerHTML = '✓✓';
+                    el.style.color = '#53bdeb'; // Blue ticks
+                });
+            }
         });
 
         socket.on('vaultHistoryData', (messages) => {
@@ -469,7 +503,11 @@
                 content += `<video controls src="${msg.fileData}"></video>`;
             }
             
-            const ticks = msg.user === currentUser ? '<span style="color: #53bdeb; margin-left:4px;">✓✓</span>' : '';
+            // Ticks: 1 grey tick (✓) if sent, 2 blue ticks (✓✓) if seen
+            let tickColor = msg.status === 'seen' ? '#53bdeb' : '#8696a0';
+            let tickSymbol = msg.status === 'seen' ? '✓✓' : '✓';
+            const ticks = msg.user === currentUser ? `<span class="tick-mark" style="color: ${tickColor}; margin-left:4px;">${tickSymbol}</span>` : '';
+            
             content += `<div style="font-size:9px; float:right; color:#8696a0; margin-top:5px; margin-left:10px;">${msg.time} ${ticks}</div>`;
             
             if (msg.reaction) {
