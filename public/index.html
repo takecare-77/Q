@@ -47,13 +47,13 @@
 <body>
 
     <div id="shop-section">
-        <div class="top-bar">✨ TrendStore Women Fashion & Accessories</div>
+        <div class="top-bar">✨ TrendStore Women Fashion</div>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search Kurti, Bracelets, Makeup..." onkeypress="handleSearchKey(event)">
             <button onclick="handleSearch()">Search</button>
         </div>
         <div class="shop-content">
-            <h2>Trending Collection (100+ Unique Items)</h2>
+            <h2>Trending Collection (100+ Items)</h2>
             <div id="productGrid" style="display: flex; flex-direction: column; gap: 15px;"></div>
         </div>
     </div>
@@ -127,37 +127,32 @@
         let localStream;
         const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        const fashionProducts = [
-            { title: "Designer Ethnic Printed Kurti", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=200" },
-            { title: "Traditional Gold Plated Bracelet", img: "https://images.unsplash.com/photo-1611591475271-133526155554?w=200" },
-            { title: "Women's Party Wear Gown", img: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=200" },
-            { title: "Matte Lipstick & Makeup Kit", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=200" },
-            { title: "Chic Stylish Handbag for Women", img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=200" },
-            { title: "Crystal Studded Silver Earrings", img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=200" },
-            { title: "Embroidered Party Kurta Set", img: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=200" },
-            { title: "Casual Denim Jacket for Women", img: "https://images.unsplash.com/photo-1544441893-675973e31985?w=200" },
-            { title: "Bridal Kundan Choker Necklace", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=200" },
-            { title: "Silk Banarasi Dupatta & Suit", img: "https://images.unsplash.com/photo-1610303219691-04624d62325b?w=200" },
-            { title: "Designer Oxidized Silver Jhumkas", img: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=200" },
-            { title: "Elegant Floral Printed Saree", img: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=200" }
+        const productList = [
+            { name: "Designer Ethnic Kurti", type: "Kurti" },
+            { name: "Gold Plated Stone Bracelet", type: "Bracelet" },
+            { name: "Party Wear Gown", type: "Gown" },
+            { name: "Matte Lipstick & Makeup Kit", type: "Makeup" },
+            { name: "Stylish Women Handbag", type: "Accessory" },
+            { name: "Silver Oxidized Jhumkas", type: "Earrings" },
+            { name: "Embroidered Party Kurta", type: "Kurti" },
+            { name: "Casual Denim Jacket", type: "Jacket" },
+            { name: "Bridal Kundan Choker", type: "Jewellery" },
+            { name: "Banarasi Silk Saree", type: "Saree" }
         ];
 
         function loadProducts() {
             const grid = document.getElementById('productGrid');
             grid.innerHTML = '';
-            // Generates 100+ unique non-repeating items across fashion, bracelets, accessories, and makeup
-            for(let i=0; i<10; i++) {
-                fashionProducts.forEach((p, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    card.innerHTML = `
-                        <img src="${p.img}" alt="${p.title}" style="width:100px; height:100px; object-fit:cover; border-radius:6px; margin-bottom:8px;">
-                        <h3>${p.title} - Style ${(i*12)+index+1}</h3>
-                        <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.title)}" target="_blank">🔗 View on Google Shop / Meesho / Flipkart</a>
-                    `;
-                    grid.appendChild(card);
-                });
-            }
+            
+            productList.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <h3>${item.name} (${item.type})</h3>
+                    <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(item.name)}" target="_blank">🔗 View on Google Shop / Meesho / Flipkart</a>
+                `;
+                grid.appendChild(card);
+            });
         }
 
         window.onload = function() {
@@ -369,4 +364,39 @@
             localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
             peerConnection.ontrack = (event) => {
-                document.getElementById('remoteVideo').srcObject 
+                document.getElementById('remoteVideo').srcObject = event.streams[0];
+            };
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) socket.emit('candidate', event.candidate);
+            };
+
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            socket.emit('answer', answer);
+        });
+
+        socket.on('answer', async (answer) => {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        });
+
+        socket.on('candidate', async (candidate) => {
+            if (peerConnection) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        });
+
+        function endCall() {
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            if (peerConnection) peerConnection.close();
+            document.getElementById('callScreen').style.display = 'none';
+        }
+
+        socket.on('message', (msg) => {
+            appendMessage(msg, 'messages');
+        });
+
+        socket.on('initialLiveMessages', (messages) => {
+            const msgContainer = document.getElementById('messages');
+     
