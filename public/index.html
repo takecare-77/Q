@@ -11,14 +11,14 @@
         body { background: #fff; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
         #shop-section { width: 100%; max-width: 480px; display: flex; flex-direction: column; min-height: 100vh; }
-        .top-bar { background: #232f3e; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .top-bar { background: #232f3e; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; }
         .search-container { padding: 10px; background: #eaeded; display: flex; gap: 5px; }
         .search-container input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; outline: none; }
         .search-container button { background: #febd69; border: 1px solid #a88734; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
         .shop-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; flex: 1; overflow-y: auto; }
         .product-card { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .product-card h3 { font-size: 15px; margin: 8px 0; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-card h3 { font-size: 15px; margin: 8px 0; }
         .product-card a { display: inline-block; background: #ffd814; color: #000; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 5px; }
 
         .auth-section { display: none; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100vh; padding: 20px; background: #111b21; color: #fff; }
@@ -47,9 +47,7 @@
 <body>
 
     <div id="shop-section">
-        <div class="top-bar">
-            <span>✨ TrendStore Women Fashion & Accessories</span>
-        </div>
+        <div class="top-bar">✨ TrendStore Women Fashion</div>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search Kurti, Bracelets, Makeup..." onkeypress="handleSearchKey(event)">
             <button onclick="handleSearch()">Search</button>
@@ -57,7 +55,7 @@
         <div class="shop-content">
             <h2>Trending Collection</h2>
             <div id="productGrid" style="display: flex; flex-direction: column; gap: 15px;">
-                <p style="text-align:center; color:#666; margin-top:20px;">Loading 300+ unique fashion items...</p>
+                <!-- Products will load instantly -->
             </div>
         </div>
     </div>
@@ -71,7 +69,6 @@
         </div>
     </div>
 
-    <!-- Blank Vault PIN Login Box -->
     <div id="vaultLoginSection" class="auth-section">
         <div class="auth-box">
             <h2>Vault History</h2>
@@ -132,43 +129,38 @@
         let localStream;
         const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        async function loadLiveProducts() {
-            try {
-                const categories = ['womens-dresses', 'womens-jewellery', 'womens-bags', 'womens-shoes', 'beauty', 'tops', 'sunglasses', 'womens-watches'];
-                let allProducts = [];
-                let uniqueIds = new Set();
+        // Instant Load Products List (No API Delay or Deployment Errors)
+        const sampleProducts = [
+            { title: "Designer Ethnic Printed Kurti", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=200" },
+            { title: "Traditional Gold Plated Bracelet", img: "https://images.unsplash.com/photo-1611591475271-133526155554?w=200" },
+            { title: "Women's Party Wear Gown", img: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=200" },
+            { title: "Matte Lipstick & Makeup Kit", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=200" },
+            { title: "Chic Stylish Handbag for Women", img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=200" },
+            { title: "Crystal Studded Silver Earrings", img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=200" },
+            { title: "Embroidered Party Kurta Set", img: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=200" },
+            { title: "Casual Denim Jacket for Women", img: "https://images.unsplash.com/photo-1544441893-675973e31985?w=200" }
+        ];
 
-                for (let cat of categories) {
-                    const res = await fetch(`https://dummyjson.com/products/category/${cat}?limit=50`);
-                    const data = await res.json();
-                    data.products.forEach(p => {
-                        if (!uniqueIds.has(p.id)) {
-                            uniqueIds.add(p.id);
-                            allProducts.push(p);
-                        }
-                    });
-                }
-
-                const grid = document.getElementById('productGrid');
-                grid.innerHTML = '';
-
-                allProducts.forEach(product => {
+        function loadProducts() {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            // Multiplying to display multiple items smoothly
+            for(let i=0; i<35; i++) {
+                sampleProducts.forEach((p, index) => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.innerHTML = `
-                        <img src="${product.thumbnail}" alt="${product.title}" style="width:100px; height:100px; object-fit:contain; margin-bottom:8px;">
-                        <h3>${product.title}</h3>
-                        <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(product.title)}" target="_blank">🔗 View on Google Shop / Meesho / Flipkart</a>
+                        <img src="${p.img}" alt="${p.title}" style="width:100px; height:100px; object-fit:cover; border-radius:6px; margin-bottom:8px;">
+                        <h3>${p.title} #${i+1}</h3>
+                        <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.title)}" target="_blank">🔗 View on Google Shop / Meesho / Flipkart</a>
                     `;
                     grid.appendChild(card);
                 });
-            } catch (error) {
-                console.error('Error loading products:', error);
             }
         }
 
         window.onload = function() {
-            loadLiveProducts();
+            loadProducts();
         };
 
         function handleSearch() {
@@ -389,5 +381,4 @@
             socket.emit('answer', answer);
         });
 
-        socket.on('answer', async (answer) => {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription
+        socket.on('answe
