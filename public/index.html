@@ -4,474 +4,345 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrendStore</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#232f3e">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background: #111b21; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        #shop-view { width: 100%; max-width: 480px; background: #fff; min-height: 100vh; padding-bottom: 30px; color: #222; display: block; }
-        .top-navbar { background: #9c27b0; color: #fff; padding: 12px; position: sticky; top: 0; z-index: 10; }
-        .search-input { width: 100%; padding: 10px; border-radius: 6px; border: none; outline: none; font-size: 14px; }
-        .promo { background: #f80759; color: #fff; padding: 12px; text-align: center; font-size: 13px; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
-        .card { background: #fafafa; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; }
-        .card img { width: 100%; height: 150px; object-fit: cover; }
-        .card-body { padding: 8px; display: flex; flex-direction: column; flex: 1; }
-        .title { font-size: 12px; color: #333; margin-bottom: 6px; height: 30px; overflow: hidden; }
-        .price { font-size: 14px; font-weight: bold; color: #000; margin-bottom: 6px; }
-        .btn { margin-top: auto; text-decoration: none; padding: 6px; background: #fdf2fe; border: 1px solid #9c27b0; color: #9c27b0; text-align: center; font-size: 11px; font-weight: bold; border-radius: 4px; }
+        body { background: #fff; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        #shop-section { width: 100%; max-width: 480px; display: flex; flex-direction: column; min-height: 100vh; }
+        .top-bar { background: #232f3e; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; }
+        .search-container { padding: 10px; background: #eaeded; display: flex; gap: 5px; }
+        .search-container input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; outline: none; }
+        .search-container button { background: #febd69; border: 1px solid #a88734; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        
+        .shop-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; flex: 1; }
+        .product-card { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; }
+        .product-card h3 { margin-bottom: 5px; font-size: 16px; }
+        .product-card p { color: #B12704; font-weight: bold; margin-bottom: 10px; }
+        .product-card a { display: inline-block; background: #ffd814; color: #000; text-decoration: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; }
 
-        #login-section { display: none; background: #1f2c34; padding: 25px; border-radius: 8px; width: 90%; max-width: 320px; margin: 25vh auto 0 auto; text-align: center; }
-        .auth-input { width: 100%; padding: 10px; margin: 8px 0; background: #2a3942; border: 1px solid #33444d; color: #fff; border-radius: 4px; outline: none; }
-        .auth-btn { width: 100%; padding: 10px; background: #00a884; border: none; color: #fff; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .auth-section { display: none; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100vh; padding: 20px; background: #111b21; color: #fff; }
+        .auth-box { background: #202c33; padding: 30px; border-radius: 10px; width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 15px; }
+        .auth-box input { padding: 12px; border-radius: 5px; border: none; background: #2a3942; color: #fff; font-size: 16px; outline: none; }
+        .auth-box button { padding: 12px; border-radius: 5px; border: none; background: #00a884; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; }
 
-        #chat-section { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; background: #0b141a; position: relative; margin: 0 auto; }
-        .wa-header { height: 60px; background: #202c33; display: flex; align-items: center; padding: 0 10px; gap: 10px; border-bottom: 1px solid #2a3942; }
-        .peer-info { flex: 1; }
-        .peer-name { font-size: 16px; font-weight: 600; color: #e9edef; }
-        .peer-status { font-size: 11px; color: #8696a0; height: 14px; }
-        .wa-actions { display: flex; align-items: center; gap: 4px; }
-        .wa-btn { background: none; border: none; font-size: 16px; color: #aebac1; cursor: pointer; padding: 6px; }
+        #chat-section { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; background: #0b141a; color: #fff; }
+        .chat-header { height: 60px; background: #202c33; display: flex; align-items: center; padding: 0 15px; font-weight: bold; font-size: 18px; border-bottom: 1px solid #222d34; justify-content: space-between; }
+        #messages, #vaultMessages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        
+        .msg { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14px; word-break: break-word; }
+        .msg.sent { background: #005c4b; align-self: flex-end; }
+        .msg.received { background: #202c33; align-self: flex-start; }
+        .msg img, .msg video { max-width: 100%; border-radius: 6px; margin-top: 5px; }
 
-        #messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background-image: radial-gradient(#182229 10%, transparent 11%); background-size: 18px 18px; }
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 78%; position: relative; }
-        .msg-wrapper.me { align-self: flex-end; }
-        .msg-wrapper.other { align-self: flex-start; }
-        .msg-bubble { padding: 6px 9px 4px 9px; border-radius: 8px; font-size: 14.2px; line-height: 1.35; word-break: break-word; background: #202c33; color: #e9edef; position: relative; cursor: pointer; }
-        .me .msg-bubble { background: #005c4b; }
-        .tick { font-size: 12px; color: #8696a0; margin-left: 3px; }
-        .tick.seen { color: #53bdeb; }
-
-        #msg-context-menu { display: none; position: fixed; background: #233138; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 400; overflow: hidden; width: 140px; }
-        .menu-item { padding: 10px 14px; font-size: 13px; color: #e9edef; cursor: pointer; border-bottom: 1px solid #2a3942; }
-        .menu-item:hover { background: #182229; }
-
-        #media-viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; align-items: center; justify-content: center; flex-direction: column; }
-        #viewer-content { max-width: 90vw; max-height: 80vh; border-radius: 8px; }
-
-        #reply-preview-bar { display: none; background: #202c33; padding: 6px 12px; border-left: 4px solid #00a884; font-size: 12px; color: #e9edef; align-items: center; justify-content: space-between; }
-        #media-preview-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 300; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-
-        .chat-footer { padding: 8px; background: #202c33; display: flex; flex-direction: column; gap: 4px; }
-        .chat-footer-row { display: flex; align-items: center; gap: 6px; width: 100%; }
-        .wa-input-pill { flex: 1; background: #2a3942; border-radius: 24px; display: flex; align-items: center; padding: 4px 12px; }
-        .wa-input-pill input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 15px; padding: 6px 0; }
-        .send-round-btn { width: 40px; height: 40px; background: #00a884; border-radius: 50%; border: none; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
-
-        #pin-modal, #deleted-box-view, #call-screen, #incoming-modal { display: none; position: fixed; inset: 0; z-index: 100; }
-        #pin-modal { background: rgba(0,0,0,0.85); justify-content: center; align-items: center; }
-        .modal-box { background: #202c33; border-radius: 12px; padding: 22px; width: 85%; max-width: 320px; text-align: center; margin: 0 auto; }
-        #deleted-box-view { background: #0b141a; flex-direction: column; z-index: 150; }
-        .deleted-box-header { height: 60px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid #2a3942; }
-
-        #call-screen { background: #0b141a; z-index: 200; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 10px 40px; }
-        .call-video-container { position: relative; width: 100%; max-width: 450px; flex: 1; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        #remote-video { width: 100%; height: 100%; object-fit: cover; }
-        #local-video { position: absolute; right: 12px; top: 12px; width: 100px; height: 130px; object-fit: cover; border-radius: 8px; border: 2px solid #00a884; background: #222; }
-        .call-controls { display: flex; gap: 16px; align-items: center; }
-        .ctrl-btn { width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; color: #fff; background: #2a3942; display: flex; align-items: center; justify-content: center; }
-        .ctrl-btn.off { background: #ff9800; color: #111; }
-        .end-call-btn { width: 56px; height: 56px; border-radius: 50%; background: #ea0038; border: none; font-size: 22px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; }
-        #incoming-modal { top: 20px; bottom: auto; width: 90%; max-width: 400px; margin: 0 auto; background: #202c33; border-radius: 12px; padding: 14px; z-index: 250; box-shadow: 0 5px 20px rgba(0,0,0,0.6); align-items: center; justify-content: space-between; display: none; }
+        .chat-footer { padding: 10px; background: #202c33; display: flex; gap: 8px; align-items: center; }
+        .chat-footer input[type="text"] { flex: 1; padding: 10px 15px; border-radius: 20px; border: none; background: #2a3942; color: #fff; outline: none; }
+        .attach-btn, .call-btn { background: none; border: none; color: #8696a0; font-size: 18px; cursor: pointer; }
+        .chat-footer button.send-btn { background: #00a884; border: none; color: #fff; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-weight: bold; }
     </style>
 </head>
-<body onclick="closeContextMenu()">
+<body>
 
-    <div id="msg-context-menu">
-        <div class="menu-item" onclick="triggerReplyFromMenu()">Reply</div>
-        <div class="menu-item" id="menu-edit-btn" onclick="triggerEditFromMenu()" style="display:none;">Edit</div>
-        <div class="menu-item" id="menu-delete-btn" onclick="triggerDeleteFromMenu()" style="display:none; color:#ff5252;">Delete</div>
-    </div>
-
-    <div id="media-viewer" onclick="this.style.display='none'">
-        <div onclick="event.stopPropagation()" style="position:relative;">
-            <button onclick="document.getElementById('media-viewer').style.display='none'" style="position:absolute; top:-35px; right:0; background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">✕</button>
-            <div id="viewer-content"></div>
+    <div id="shop-section">
+        <div class="top-bar">TrendStore</div>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search Kurti, Jeans, etc..." onkeypress="handleSearchKey(event)">
+            <button onclick="handleSearch()">Search</button>
+        </div>
+        <div class="shop-content">
+            <h2>Trending Unique Items</h2>
+            <div class="product-card">
+                <h3>Designer Kurti</h3>
+                <p>₹799</p>
+                <a href="https://www.meesho.com" target="_blank">View on Meesho</a>
+            </div>
+            <div class="product-card">
+                <h3>Denim Jeans</h3>
+                <p>₹1,199</p>
+                <a href="https://www.flipkart.com" target="_blank">View on Flipkart</a>
+            </div>
         </div>
     </div>
 
-    <input type="file" id="media-input" accept="image/*,video/*" style="display:none;" onchange="previewMedia(event)">
-
-    <div id="media-preview-modal">
-        <div id="preview-container" style="max-width:100%; max-height:70vh; margin-bottom:15px; display:flex; justify-content:center;"></div>
-        <input type="text" id="caption-input" class="auth-input" placeholder="Add a caption..." style="max-width:300px;">
-        <div style="display:flex; gap:10px; margin-top:10px;">
-            <button onclick="sendMediaMessage()" style="background:#00a884; border:none; padding:8px 18px; color:#fff; border-radius:6px; font-weight:bold; cursor:pointer;">Send</button>
-            <button onclick="document.getElementById('media-preview-modal').style.display='none'" style="background:#ea0038; border:none; padding:8px 18px; color:#fff; border-radius:6px; font-weight:bold; cursor:pointer;">Cancel</button>
+    <div id="login-section" class="auth-section">
+        <div class="auth-box">
+            <h2>Secure Access</h2>
+            <input type="text" id="usernameInput" placeholder="Username (user1 / user2)">
+            <input type="password" id="passwordInput" placeholder="Password">
+            <button onclick="login()">Enter Chat</button>
         </div>
     </div>
 
-    <div id="incoming-modal">
-        <div>
-            <div style="font-size: 14px; font-weight: bold; color: #00a884;" id="incoming-caller">Incoming Call...</div>
-            <div style="font-size:11px; color:#8696a0;">Secure Stream Connecting</div>
+    <div id="vaultLoginSection" class="auth-section">
+        <div class="auth-box">
+            <h2>Vault History PIN</h2>
+            <input type="password" id="vaultPinInput" placeholder="Enter Vault PIN (1717)">
+            <button onclick="openVault()">Unlock Vault</button>
         </div>
-        <div style="display: flex; gap: 8px;">
-            <button onclick="acceptIncoming()" style="background:#00a884; border:none; padding:8px 14px; color:#fff; border-radius:6px; font-weight:bold; cursor:pointer;">Accept</button>
-            <button onclick="rejectIncoming()" style="background:#ea0038; border:none; padding:8px 14px; color:#fff; border-radius:6px; font-weight:bold; cursor:pointer;">Decline</button>
-        </div>
-    </div>
-
-    <div id="call-screen">
-        <div style="color: #8696a0; font-size: 14px; margin-top: 15px;" id="call-label">Encrypted Call...</div>
-        <div class="call-video-container">
-            <video id="remote-video" autoplay playsinline></video>
-            <video id="local-video" autoplay playsinline muted></video>
-        </div>
-        <div class="call-controls">
-            <button id="mic-toggle-btn" class="ctrl-btn" onclick="toggleAudio()">🎙️</button>
-            <button id="cam-toggle-btn" class="ctrl-btn" onclick="toggleVideo()">📷</button>
-            <button class="end-call-btn" onclick="hangUp()">📴</button>
-        </div>
-    </div>
-
-    <div id="pin-modal">
-        <div class="modal-box">
-            <h3 style="color:#00a884; margin-bottom:10px;">Secret Deleted Vault</h3>
-            <p style="font-size: 12px; color: #8696a0; margin-bottom: 10px;">Enter PIN (1717)</p>
-            <input type="password" id="vault-pin-input" class="auth-input">
-            <button class="auth-btn" onclick="submitVaultPin()">Open Vault</button>
-            <button class="auth-btn" style="background: #39444d; margin-top: 6px;" onclick="document.getElementById('pin-modal').style.display='none'">Cancel</button>
-            <p id="pin-err" style="color: #ff5252; font-size: 11px; margin-top: 8px;"></p>
-        </div>
-    </div>
-
-    <div id="deleted-box-view">
-        <div class="deleted-box-header">
-            <span style="font-weight:bold;">🗑️ Deleted Messages Vault</span>
-            <button class="wa-btn" style="background: #00a884; color: #fff; padding: 6px 12px; border-radius: 4px;" onclick="document.getElementById('deleted-box-view').style.display='none'">Back</button>
-        </div>
-        <div id="deleted-messages-list" style="flex:1; padding:14px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
-    </div>
-
-    <div id="shop-view">
-        <div class="top-navbar">
-            <span style="font-size:18px; font-weight:bold; display:block; margin-bottom:8px;">TrendStore - Fashion & Accessories</span>
-            <input type="text" id="store-search" class="search-input" placeholder="Search Sarees, Watches, Bracelets..." autocomplete="off" oninput="checkSearchTrigger(event)">
-        </div>
-        <div class="promo">Mega Fashion & Accessories Sale 🔥 Free Delivery</div>
-        <div class="grid" id="product-list"></div>
-    </div>
-
-    <div id="login-section">
-        <h3 style="color:#00a884; margin-bottom:15px;">Secure Sign-in</h3>
-        <input type="text" id="user-input" class="auth-input" placeholder="Username">
-        <input type="password" id="pass-input" class="auth-input" value="1717">
-        <button class="auth-btn" onclick="startSession()">Login</button>
-        <p id="login-err" style="color: #ff5252; font-size: 11px; margin-top: 8px;"></p>
     </div>
 
     <div id="chat-section">
-        <div class="wa-header">
-            <div class="peer-info">
-                <div class="peer-name" id="chat-title">Chat Room</div>
-                <div class="peer-status" id="status-display">online</div>
-            </div>
-            <div class="wa-actions">
-                <button class="wa-btn" title="Audio Call" onclick="startCall('audio')">🎧</button>
-                <button class="wa-btn" title="Video Call" onclick="startCall('video')">📹</button>
-                <button class="wa-btn" title="Move to Deleted Box" onclick="deleteChatToVault()">🗑️</button>
-                <button class="wa-btn" title="Open Deleted Box (PIN: 1717)" onclick="document.getElementById('pin-modal').style.display='flex'">📂</button>
-                <button class="wa-btn" title="Exit" onclick="location.reload()">✖</button>
+        <div class="chat-header">
+            <span id="roomTitle">Secure Chat</span>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <span class="call-btn" onclick="startCall('video')" title="Video Call">📹</span>
+                <span class="call-btn" onclick="startCall('audio')" title="Voice Call">📞</span>
+                <span onclick="lockApp()" style="cursor: pointer; font-size: 14px; color: #8696a0;">Lock</span>
             </div>
         </div>
-
-        <div id="messages"></div>
-
+        <div id="messages" onscroll="checkPrivacyScroll(event)"></div>
+        
         <div class="chat-footer">
-            <div id="reply-preview-bar">
-                <span id="reply-text-preview">Replying to message</span>
-                <span onclick="cancelReply()" style="cursor:pointer; font-weight:bold;">✕</span>
-            </div>
-            <div class="chat-footer-row">
-                <div class="wa-input-pill">
-                    <button class="wa-btn" onclick="document.getElementById('media-input').click()" style="padding:0 4px;">📎</button>
-                    <input type="text" id="type-input" placeholder="Message" oninput="sendTyping()" onkeypress="if(event.key==='Enter') sendMessage()">
-                </div>
-                <button class="send-round-btn" onclick="sendMessage()">➤</button>
-            </div>
+            <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;" onchange="handleMediaUpload(event)">
+            <button class="attach-btn" onclick="document.getElementById('mediaInput').click()">📎</button>
+            <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleChatKey(event)">
+            <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
+    </div>
+
+    <!-- Call Screen Overlay -->
+    <div id="callScreen" style="display: none; position: fixed; inset: 0; background: #0b141a; z-index: 100; flex-direction: column; justify-content: center; align-items: center;">
+        <div style="position: relative; width: 100%; max-width: 400px; height: 60vh; background: #000; border-radius: 10px; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+            <video id="remoteVideo" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <video id="localVideo" autoplay playsinline muted style="position: absolute; bottom: 10px; right: 10px; width: 100px; height: 140px; object-fit: cover; border-radius: 6px; border: 2px solid #fff;"></video>
+        </div>
+        <button onclick="endCall()" style="margin-top: 20px; background: #ea4335; color: #fff; border: none; padding: 12px 25px; border-radius: 30px; font-weight: bold; cursor: pointer;">End Call</button>
+    </div>
+
+    <div id="vaultSection" style="display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; background: #0b141a; color: #fff;">
+        <div class="chat-header">
+            <span>Deleted / Vault History</span>
+            <span onclick="lockApp()" style="cursor: pointer; font-size: 14px; color: #8696a0;">Close</span>
+        </div>
+        <div id="vaultMessages"></div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const storeItems = [
-            {t: "Banarasi Kanjivaram Silk Saree", p: "Rs. 649", s: "Meesho", i: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70"},
-            {t: "Women Printed Anarkali Kurta", p: "Rs. 349", s: "Flipkart", i: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70"},
-            {t: "Men White Casual Sneakers", p: "Rs. 499", s: "Amazon", i: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70"},
-            {t: "Floral Georgette Maxi Dress", p: "Rs. 899", s: "Ajio", i: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70"},
-            {t: "Men Slim Fit Denim Jeans", p: "Rs. 749", s: "Nykaa", i: "https://images.unsplash.com/photo-1542272604-780c96856592?w=350&q=70"},
-            {t: "Matte Longstay Liquid Lipstick", p: "Rs. 299", s: "Meesho", i: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=350&q=70"},
-            {t: "Luxury Analog Wrist Watch", p: "Rs. 1,199", s: "Amazon", i: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70"},
-            {t: "Unisex Streetwear Cotton Hoodie", p: "Rs. 599", s: "Amazon", i: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=350&q=70"},
-            {t: "Vintage UV Protected Sunglasses", p: "Rs. 249", s: "Ajio", i: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=350&q=70"},
-            {t: "Gold Plated Charm Bracelet", p: "Rs. 399", s: "Myntra", i: "https://images.unsplash.com/photo-1611591475271-e63b33342371?w=350&q=70"}
-        ];
+        const socket = io();
+        let currentUser = '';
+        let selectedFile = null;
+        let selectedFileType = null;
+        let peerConnection;
+        let localStream;
+        const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        const names = ["Saree", "Kurti", "Sneakers", "Maxi Dress", "Jeans", "Lipstick", "Watch", "Hoodie", "Sunglasses", "Bracelet", "Handbag", "Chain", "Ring", "Earrings", "Jacket", "Wallet", "Belt", "Scarf", "Cap", "Polo"];
-        const sources = ["Meesho", "Flipkart", "Amazon", "Myntra", "Ajio", "Nykaa"];
-        const pics = [
-            "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=350&q=70",
-            "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=350&q=70",
-            "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=350&q=70",
-            "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=350&q=70",
-            "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=350&q=70"
-        ];
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const searchInput = document.getElementById('searchInput');
 
-        let idxVal = 10;
-        while(storeItems.length < 200) {
-            let n = names[idxVal % names.length];
-            let src = sources[idxVal % sources.length];
-            let img = pics[idxVal % pics.length];
-            storeItems.push({
-                t: `Designer ${n} Collection ${idxVal}`,
-                p: `Rs. ${(199 + (idxVal * 27) % 1000)}`,
-                s: src,
-                i: img
-            });
-            idxVal++;
-        }
-
-        function renderProductsNow() {
-            const container = document.getElementById('product-list');
-            if (!container) return;
-            let html = '';
-            storeItems.forEach(item => {
-                let link = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(item.t + " " + item.s)}`;
-                html += `<div class="card"><img src="${item.i}" loading="lazy"><div class="card-body"><div class="title">${item.t}</div><div class="price">${item.p}</div><a href="${link}" target="_blank" class="btn">Buy Now ↗</a></div></div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', renderProductsNow);
-        } else {
-            renderProductsNow();
-        }
-
-        function checkSearchTrigger(e) {
-            let val = e.target.value.trim().toLowerCase();
-            if (val === 't9') {
-                document.getElementById('shop-view').style.display = 'none';
-                document.getElementById('login-section').style.display = 'block';
+            if (query === 't9') {
+                document.getElementById('shop-section').style.display = 'none';
+                document.getElementById('login-section').style.display = 'flex';
+                searchInput.value = '';
+            } else if (query === 'history') {
+                document.getElementById('shop-section').style.display = 'none';
+                document.getElementById('vaultLoginSection').style.display = 'flex';
+                searchInput.value = '';
+            } else if (query) {
+                window.open(`https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`, '_blank');
             }
         }
 
-        let socket, currentUser = '';
-        let localStream, peerConn, pendingSignal;
-        let replyingToMsg = null, pendingMediaData = null, selectedMsgForMenu = null;
+        function handleSearchKey(e) {
+            if (e.key === 'Enter') handleSearch();
+        }
 
-        async function startSession() {
-            const u = document.getElementById('user-input').value.trim();
-            const p = document.getElementById('pass-input').value.trim();
-            if (!u || !p) return;
+        function login() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
 
-            try {
-                const res = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: u, password: p })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    currentUser = u;
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('chat-section').style.display = 'flex';
-                    document.getElementById('chat-title').innerText = u;
-                    initSocket();
-                } else {
-                    document.getElementById('login-err').innerText = 'Invalid Password (Use: 1717)';
-                }
-            } catch (err) {
-                document.getElementById('login-err').innerText = 'Login error';
+            if ((username === 'user1' && password === 'pass123') || (username === 'user2' && password === 'pass456')) {
+                currentUser = username;
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('chat-section').style.display = 'flex';
+                document.getElementById('roomTitle').innerText = `Chat (${currentUser})`;
+                socket.emit('joinRoom', currentUser);
+            } else {
+                alert('Invalid Username or Password!');
             }
         }
 
-        function initSocket() {
-            socket = io();
-            socket.emit('joinRoom', currentUser);
-            socket.emit('markSeen', currentUser);
-
-            socket.on('initialLiveMessages', (list) => { renderMessagesList(list); });
-            socket.on('message', (msg) => { appendMessageNode(msg); if (msg.user !== currentUser) socket.emit('markSeen', currentUser); });
-            socket.on('updateMessages', (list) => { renderMessagesList(list); });
-            socket.on('typing', (data) => {
-                if (data.user !== currentUser) {
-                    document.getElementById('status-display').innerText = data.isTyping ? 'typing...' : 'online';
-                }
-            });
-            socket.on('seenUpdate', () => {
-                document.querySelectorAll('.tick').forEach(t => { t.innerText = '✓✓'; t.classList.add('seen'); });
-            });
-            socket.on('liveChatCleared', () => { document.getElementById('messages').innerHTML = ''; });
-            socket.on('deletedBoxData', (list) => {
-                document.getElementById('pin-modal').style.display = 'none';
-                const container = document.getElementById('deleted-messages-list');
-                container.innerHTML = list.length === 0 ? '<div style="text-align:center; color:#8696a0; margin-top:20px;">No deleted messages.</div>' : '';
-                list.forEach(m => appendMessageNode(m));
-                document.getElementById('deleted-box-view').style.display = 'flex';
-            });
-            socket.on('vaultError', (err) => { document.getElementById('pin-err').innerText = err; });
-            socket.on('incomingCall', (data) => {
-                pendingSignal = data.signal;
-                document.getElementById('incoming-caller').innerText = `${data.from} calling (${data.callType})...`;
-                document.getElementById('incoming-modal').style.display = 'flex';
-            });
-            socket.on('callAccepted', (signal) => { if (peerConn) peerConn.setRemoteDescription(new RTCSessionDescription(signal)); });
-            socket.on('callEnded', () => { closeCallUI(); });
-        }
-
-        function renderMessagesList(list) {
-            const box = document.getElementById('messages');
-            box.innerHTML = '';
-            list.forEach(m => appendMessageNode(m));
-        }
-
-        function appendMessageNode(msg) {
-            const isMe = msg.user === currentUser;
-            const wrap = document.createElement('div');
-            wrap.className = `msg-wrapper ${isMe ? 'me' : 'other'}`;
-
-            let replyHtml = msg.replyTo ? `<div style="background:rgba(0,0,0,0.2); border-left:3px solid #00a884; padding:3px 6px; font-size:11px; margin-bottom:4px; border-radius:4px; color:#aebac1;">${msg.replyTo}</div>` : '';
-            let mediaPart = msg.fileData ? (msg.fileType === 'video' ? `<video src="${msg.fileData}" onclick="openMediaViewer('video', '${msg.fileData}')" style="max-width:220px; border-radius:6px; margin-bottom:4px; display:block; cursor:pointer;"></video>` : `<img src="${msg.fileData}" onclick="openMediaViewer('image', '${msg.fileData}')" style="max-width:220px; border-radius:6px; margin-bottom:4px; display:block; cursor:pointer;">`) : '';
-            const tickHtml = isMe ? `<span class="tick ${msg.status === 'seen' ? 'seen' : ''}">${msg.status === 'seen' ? '✓✓' : '✓'}</span>` : '';
-
-            const bubble = document.createElement('div');
-            bubble.className = 'msg-bubble';
-            bubble.innerHTML = `${replyHtml}${mediaPart}<div class="msg-text-content">${msg.text}</div><div style="font-size:9px; color:#8696a0; text-align:right; margin-top:2px;"><span>${msg.time}</span>${tickHtml}</div>`;
-
-            let pressTimer;
-            bubble.addEventListener('touchstart', (e) => { pressTimer = setTimeout(() => showContextMenu(e, msg, isMe), 600); });
-            bubble.addEventListener('touchend', () => clearTimeout(pressTimer));
-            bubble.addEventListener('contextmenu', (e) => { e.preventDefault(); showContextMenu(e, msg, isMe); });
-
-            wrap.appendChild(bubble);
-            const box = document.getElementById('messages');
-            box.appendChild(wrap);
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function showContextMenu(e, msg, isMe) {
-            e.stopPropagation();
-            selectedMsgForMenu = msg;
-            const menu = document.getElementById('msg-context-menu');
-            document.getElementById('menu-edit-btn').style.display = isMe ? 'block' : 'none';
-            document.getElementById('menu-delete-btn').style.display = isMe ? 'block' : 'none';
-            menu.style.left = Math.min(e.clientX || 100, window.innerWidth - 150) + 'px';
-            menu.style.top = Math.min(e.clientY || 100, window.innerHeight - 120) + 'px';
-            menu.style.display = 'block';
-        }
-
-        function closeContextMenu() { document.getElementById('msg-context-menu').style.display = 'none'; }
-        function triggerReplyFromMenu() { if (selectedMsgForMenu) setReply(selectedMsgForMenu.user + ": " + (selectedMsgForMenu.text || "Media")); closeContextMenu(); }
-        function triggerEditFromMenu() {
-            if (selectedMsgForMenu) {
-                const newTxt = prompt("Edit message:", selectedMsgForMenu.text);
-                if (newTxt !== null && newTxt.trim() !== "") socket.emit('editMessage', { id: selectedMsgForMenu.id, user: currentUser, newText: newTxt.trim() });
+        function openVault() {
+            const pin = document.getElementById('vaultPinInput').value.trim();
+            if (pin === '1717') {
+                document.getElementById('vaultLoginSection').style.display = 'none';
+                document.getElementById('vaultSection').style.display = 'flex';
+                socket.emit('requestVaultHistory');
+            } else {
+                alert('Incorrect Vault PIN! Try 1717');
             }
-            closeContextMenuItem();
-        }
-        function triggerDeleteFromMenu() {
-            if (selectedMsgForMenu && confirm("Delete this message?")) socket.emit('deleteMessage', selectedMsgForMenu.id);
-            closeContextMenu();
         }
 
-        function openMediaViewer(type, src) {
-            document.getElementById('viewer-content').innerHTML = type === 'video' ? `<video src="${src}" controls autoplay style="max-width:90vw; max-height:80vh;"></video>` : `<img src="${src}" style="max-width:90vw; max-height:80vh; object-fit:contain;">`;
-            document.getElementById('media-viewer').style.display = 'flex';
+        function lockApp() {
+            document.getElementById('chat-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('vaultLoginSection').style.display = 'none';
+            document.getElementById('vaultSection').style.display = 'none';
+            document.getElementById('shop-section').style.display = 'flex';
+            endCall();
         }
 
-        function setReply(txt) { replyingToMsg = txt; document.getElementById('reply-text-preview').innerText = txt; document.getElementById('reply-preview-bar').style.display = 'flex'; }
-        function cancelReply() { replyingToMsg = null; document.getElementById('reply-preview-bar').style.display = 'none'; }
+        let lastScrollTop = 0;
+        function checkPrivacyScroll(e) {
+            const container = e.target;
+            if (Math.abs(container.scrollTop - lastScrollTop) > 80) {
+                lockApp();
+            }
+            lastScrollTop = container.scrollTop;
+        }
 
-        function previewMedia(e) {
-            const file = e.target.files[0];
+        function handleMediaUpload(event) {
+            const file = event.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
-            reader.onload = function(evt) {
-                pendingMediaData = { type: file.type.startsWith('video') ? 'video' : 'image', data: evt.target.result };
-                document.getElementById('preview-container').innerHTML = pendingMediaData.type === 'video' ? `<video src="${pendingMediaData.data}" controls style="max-height:60vh; max-width:100%;"></video>` : `<img src="${pendingMediaData.data}" style="max-height:60vh; max-width:100%;">`;
-                document.getElementById('media-preview-modal').style.display = 'flex';
+            reader.onload = function(uploadEvent) {
+                selectedFile = uploadEvent.target.result;
+                selectedFileType = file.type.startsWith('image') ? 'image' : 'video';
+                
+                socket.emit('chatMessage', {
+                    user: currentUser,
+                    text: '',
+                    fileType: selectedFileType,
+                    fileData: selectedFile
+                });
+                selectedFile = null;
+                selectedFileType = null;
+                event.target.value = '';
             };
             reader.readAsDataURL(file);
-            e.target.value = '';
-        }
-
-        function sendMediaMessage() {
-            if (!pendingMediaData || !socket) return;
-            socket.emit('chatMessage', { user: currentUser, text: document.getElementById('caption-input'].value.trim(), fileType: pendingMediaData.type, fileData: pendingMediaData.data, replyTo: replyingToMsg });
-            document.getElementById('media-preview-modal').style.display = 'none';
-            document.getElementById('caption-input').value = '';
-            pendingMediaData = null;
-            cancelReply();
         }
 
         function sendMessage() {
-            const inp = document.getElementById('type-input');
-            if (!inp.value.trim() || !socket) return;
-            socket.emit('chatMessage', { user: currentUser, text: inp.value.trim(), replyTo: replyingToMsg });
-            inp.value = '';
-            cancelReply();
-            socket.emit('typing', { user: currentUser, isTyping: false });
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text && !selectedFile) return;
+
+            socket.emit('chatMessage', {
+                user: currentUser,
+                text: text,
+                fileType: selectedFileType,
+                fileData: selectedFile
+            });
+
+            input.value = '';
+            selectedFile = null;
+            selectedFileType = null;
         }
 
-        let typeTimer;
-        function sendTyping() {
-            socket.emit('typing', { user: currentUser, isTyping: true });
-            clearTimeout(typeTimer);
-            typeTimer = setTimeout(() => { socket.emit('typing', { user: currentUser, isTyping: false }); }, 1000);
+        function handleChatKey(e) {
+            if (e.key === 'Enter') sendMessage();
         }
 
-        function deleteChatToVault() { if (confirm("Move current chat to Deleted Box vault?")) socket.emit('moveToDeletedBox'); }
-        function submitVaultPin() { const pin = document.getElementById('vault-pin-input').value; if (pin && socket) socket.emit('openDeletedBox', pin); }
-
-        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-        async function startCall(callType) {
+        // WebRTC Call Functions
+        async function startCall(type) {
+            document.getElementById('callScreen').style.display = 'flex';
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: callType === 'video', audio: true });
-                document.getElementById('local-video').srcObject = localStream;
-                document.getElementById('call-screen').style.display = 'flex';
-                document.getElementById('call-label').innerText = callType === 'video' ? 'Connecting Media...' : 'Connecting Audio...';
-                peerConn = new RTCPeerConnection(rtcConfig);
-                localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
-                peerConn.ontrack = (e) => { document.getElementById('remote-video').srcObject = e.streams[0]; };
-                const offer = await peerConn.createOffer();
-                await peerConn.setLocalDescription(offer);
-                socket.emit('callUser', { from: currentUser, signalData: offer, callType: callType });
-            } catch (err) { alert('Microphone/Camera permission required.'); }
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: type === 'video', 
+                    audio: true 
+                });
+                document.getElementById('localVideo').srcObject = localStream;
+
+                peerConnection = new RTCPeerConnection(servers);
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                peerConnection.ontrack = (event) => {
+                    document.getElementById('remoteVideo').srcObject = event.streams[0];
+                };
+
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) socket.emit('candidate', event.candidate);
+                };
+
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                socket.emit('offer', offer);
+            } catch (error) {
+                alert('Camera/Microphone permission denied.');
+                endCall();
+            }
         }
 
-        async function acceptIncoming() {
-            document.getElementById('incoming-modal').style.display = 'none';
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                document.getElementById('local-video').srcObject = localStream;
-                document.getElementById('call-screen').style.display = 'flex';
-                peerConn = new RTCPeerConnection(rtcConfig);
-                localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
-                peerConn.ontrack = (e) => { document.getElementById('remote-video').srcObject = e.streams[0]; };
-                await peerConn.setRemoteDescription(new RTCSessionDescription(pendingSignal));
-                const answer = await peerConn.createAnswer();
-                await peerConn.setLocalDescription(answer);
-                socket.emit('acceptCall', { signal: answer });
-            } catch (err) { alert('Call connection failed'); }
+        socket.on('offer', async (offer) => {
+            document.getElementById('callScreen').style.display = 'flex';
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('localVideo').srcObject = localStream;
+
+            peerConnection = new RTCPeerConnection(servers);
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.ontrack = (event) => {
+                document.getElementById('remoteVideo').srcObject = event.streams[0];
+            };
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) socket.emit('candidate', event.candidate);
+            };
+
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            socket.emit('answer', answer);
+        });
+
+        socket.on('answer', async (answer) => {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        });
+
+        socket.on('candidate', async (candidate) => {
+            if (peerConnection) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        });
+
+        function endCall() {
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            if (peerConnection) peerConnection.close();
+            document.getElementById('callScreen').style.display = 'none';
         }
 
-        function toggleAudio() {
-            if (!localStream) return;
-            const t = localStream.getAudioTracks()[0];
-            if (t) { t.enabled = !t.enabled; document.getElementById('mic-toggle-btn').innerText = t.enabled ? '🎙️' : '🔇'; }
-        }
-        function toggleVideo() {
-            if (!localStream) return;
-            const t = localStream.getVideoTracks()[0];
-            if (t) { t.enabled = !t.enabled; document.getElementById('cam-toggle-btn').innerText = t.enabled ? '📷' : '🚫'; }
-        }
-        function rejectIncoming() { document.getElementById('incoming-modal').style.display = 'none'; socket.emit('endCallSignal'); }
-        function hangUp() { if (socket) socket.emit('endCallSignal'); closeCallUI(); }
-        function closeCallUI() {
-            if (localStream) localStream.getTracks().forEach(t => t.stop());
-            if (peerConn) { peerConn.close(); peerConn = null; }
-            document.getElementById('call-screen').style.display = 'none';
-            document.getElementById('incoming-modal').style.display = 'none';
+        socket.on('message', (msg) => {
+            appendMessage(msg, 'messages');
+        });
+
+        socket.on('initialLiveMessages', (messages) => {
+            const msgContainer = document.getElementById('messages');
+            msgContainer.innerHTML = '';
+            messages.forEach(msg => appendMessage(msg, 'messages'));
+        });
+
+        socket.on('vaultHistoryData', (messages) => {
+            const vaultContainer = document.getElementById('vaultMessages');
+            vaultContainer.innerHTML = '';
+            if (messages.length === 0) {
+                vaultContainer.innerHTML = '<p style="color:#8696a0; text-align:center; margin-top:20px;">No history found.</p>';
+                return;
+            }
+            messages.forEach(msg => appendMessage(msg, 'vaultMessages'));
+        });
+
+        function appendMessage(msg, containerId) {
+            const targetContainer = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `msg ${msg.user === currentUser ? 'sent' : 'received'}`;
+            
+            let content = `<b>${msg.user}</b><br>`;
+            if (msg.text) {
+                content += `<span>${msg.text}</span><br>`;
+            }
+            if (msg.fileType === 'image' && msg.fileData) {
+                content += `<img src="${msg.fileData}" alt="Image">`;
+            } else if (msg.fileType === 'video' && msg.fileData) {
+                content += `<video controls src="${msg.fileData}"></video>`;
+            }
+            content += `<span style="font-size:9px; float:right; color:#8696a0; margin-top:5px; margin-left:10px;">${msg.time}</span>`;
+            
+            div.innerHTML = content;
+            targetContainer.appendChild(div);
+            targetContainer.scrollTop = targetContainer.scrollHeight;
         }
     </script>
 </body>
