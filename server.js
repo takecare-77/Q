@@ -58,7 +58,7 @@ io.on('connection', (socket) => {
         const index = liveMessages.findIndex(m => m.id === data.id);
         if (index !== -1) {
             const deleted = liveMessages.splice(index, 1)[0];
-            vaultHistory.push(deleted); // Move to vault/deleted history box
+            vaultHistory.push(deleted);
             io.emit('messageDeleted', data.id);
         }
     });
