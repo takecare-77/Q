@@ -10,6 +10,10 @@ const io = new Server(server, { maxHttpBufferSize: 1e8 });
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 const CHAT_SECRET_PASSWORD = "1717";
 const VAULT_PIN = "1717";
 
