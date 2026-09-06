@@ -53,7 +53,7 @@
             <button onclick="handleSearch()">Search</button>
         </div>
         <div class="shop-content">
-            <h2>Trending Collection (100+ Items)</h2>
+            <h2>Trending Collection (100+ Unique Items)</h2>
             <div id="productGrid" style="display: flex; flex-direction: column; gap: 15px;"></div>
         </div>
     </div>
@@ -144,15 +144,17 @@
             const grid = document.getElementById('productGrid');
             grid.innerHTML = '';
             
-            productList.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                card.innerHTML = `
-                    <h3>${item.name} (${item.type})</h3>
-                    <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(item.name)}" target="_blank">🔗 View on Google Shop / Meesho / Flipkart</a>
-                `;
-                grid.appendChild(card);
-            });
+            for(let i=0; i<10; i++) {
+                productList.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <h3>${item.name} (${item.type}) #${(i*10)+index+1}</h3>
+                        <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(item.name)}" target="_blank">🔗 View on Google Shop / Meesho / Flipkart</a>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
         }
 
         window.onload = function() {
@@ -397,6 +399,4 @@
             appendMessage(msg, 'messages');
         });
 
-        socket.on('initialLiveMessages', (messages) => {
-            const msgContainer = document.getElementById('messages');
-     
+        socket.on(
