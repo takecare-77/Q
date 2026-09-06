@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendStore</title>
+    <title>TrendStore - Fashion & Accessories</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#232f3e">
     <style>
@@ -11,7 +11,7 @@
         body { background: #fff; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
         #shop-section { width: 100%; max-width: 480px; display: flex; flex-direction: column; min-height: 100vh; }
-        .top-bar { background: #232f3e; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; }
+        .top-bar { background: #232f3e; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .search-container { padding: 10px; background: #eaeded; display: flex; gap: 5px; }
         .search-container input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; outline: none; }
         .search-container button { background: #febd69; border: 1px solid #a88734; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
@@ -19,8 +19,7 @@
         .shop-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; flex: 1; overflow-y: auto; }
         .product-card { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; align-items: center; }
         .product-card h3 { font-size: 15px; margin: 8px 0; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-        .product-card p { color: #B12704; font-weight: bold; margin-bottom: 8px; }
-        .product-card a { display: inline-block; background: #ffd814; color: #000; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        .product-card a { display: inline-block; background: #ffd814; color: #000; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 5px; }
 
         .auth-section { display: none; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100vh; padding: 20px; background: #111b21; color: #fff; }
         .auth-box { background: #202c33; padding: 30px; border-radius: 10px; width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 15px; }
@@ -31,12 +30,15 @@
         .chat-header { height: 60px; background: #202c33; display: flex; align-items: center; padding: 0 15px; font-weight: bold; font-size: 18px; border-bottom: 1px solid #222d34; justify-content: space-between; }
         #messages, #vaultMessages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        .msg { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14px; word-break: break-word; }
+        .msg { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14px; word-break: break-word; cursor: pointer; position: relative; }
         .msg.sent { background: #005c4b; align-self: flex-end; }
         .msg.received { background: #202c33; align-self: flex-start; }
         .msg img, .msg video { max-width: 100%; border-radius: 6px; margin-top: 5px; }
+        .reply-quote { background: rgba(0,0,0,0.2); border-left: 3px solid #00a884; padding: 4px 8px; font-size: 12px; margin-bottom: 4px; border-radius: 4px; color: #d1d7db; }
 
-        .chat-footer { padding: 10px; background: #202c33; display: flex; gap: 8px; align-items: center; }
+        .chat-footer { padding: 10px; background: #202c33; display: flex; flex-direction: column; gap: 5px; }
+        .reply-preview-box { display: none; background: #111b21; padding: 6px 10px; border-radius: 6px; font-size: 12px; justify-content: space-between; align-items: center; color: #00a884; }
+        .footer-row { display: flex; gap: 8px; align-items: center; }
         .chat-footer input[type="text"] { flex: 1; padding: 10px 15px; border-radius: 20px; border: none; background: #2a3942; color: #fff; outline: none; }
         .attach-btn, .call-btn { background: none; border: none; color: #8696a0; font-size: 18px; cursor: pointer; }
         .chat-footer button.send-btn { background: #00a884; border: none; color: #fff; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-weight: bold; }
@@ -45,15 +47,17 @@
 <body>
 
     <div id="shop-section">
-        <div class="top-bar">TrendStore</div>
+        <div class="top-bar">
+            <span>✨ TrendStore Women & Fashion</span>
+        </div>
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search Kurti, Jeans, etc..." onkeypress="handleSearchKey(event)">
+            <input type="text" id="searchInput" placeholder="Search Kurti, Bracelets, Makeup..." onkeypress="handleSearchKey(event)">
             <button onclick="handleSearch()">Search</button>
         </div>
         <div class="shop-content">
-            <h2>Trending Unique Items</h2>
+            <h2>Trending Women's Collection & Accessories</h2>
             <div id="productGrid" style="display: flex; flex-direction: column; gap: 15px;">
-                <p style="text-align:center; color:#666; margin-top:20px;">Loading live products...</p>
+                <p style="text-align:center; color:#666; margin-top:20px;">Loading 300+ unique fashion items...</p>
             </div>
         </div>
     </div>
@@ -70,7 +74,7 @@
     <div id="vaultLoginSection" class="auth-section">
         <div class="auth-box">
             <h2>Vault History PIN</h2>
-            <input type="password" id="vaultPinInput" placeholder="Enter Vault PIN (1717)">
+            <input type="password" id="vaultPinInput" placeholder="Enter PIN (1717)">
             <button onclick="openVault()">Unlock Vault</button>
         </div>
     </div>
@@ -87,10 +91,16 @@
         <div id="messages" onscroll="checkPrivacyScroll(event)"></div>
         
         <div class="chat-footer">
-            <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;" onchange="handleMediaUpload(event)">
-            <button class="attach-btn" onclick="document.getElementById('mediaInput').click()">📎</button>
-            <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleChatKey(event)">
-            <button class="send-btn" onclick="sendMessage()">➤</button>
+            <div id="replyPreview" class="reply-preview-box">
+                <span id="replyTextSnippet">Replying to message</span>
+                <span onclick="cancelReply()" style="cursor:pointer; font-weight:bold;">✕</span>
+            </div>
+            <div class="footer-row">
+                <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;" onchange="handleMediaUpload(event)">
+                <button class="attach-btn" onclick="document.getElementById('mediaInput').click()">📎</button>
+                <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleChatKey(event)">
+                <button class="send-btn" onclick="sendMessage()">➤</button>
+            </div>
         </div>
     </div>
 
@@ -116,26 +126,38 @@
         let currentUser = '';
         let selectedFile = null;
         let selectedFileType = null;
+        let currentReplyId = null;
         let peerConnection;
         let localStream;
         const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        // Load 200+ live products automatically
         async function loadLiveProducts() {
             try {
-                const response = await fetch('https://dummyjson.com/products?limit=200');
-                const data = await response.json();
+                const categories = ['womens-dresses', 'womens-jewellery', 'womens-bags', 'womens-shoes', 'beauty', 'tops', 'sunglasses', 'womens-watches'];
+                let allProducts = [];
+                let uniqueIds = new Set();
+
+                for (let cat of categories) {
+                    const res = await fetch(`https://dummyjson.com/products/category/${cat}?limit=50`);
+                    const data = await res.json();
+                    data.products.forEach(p => {
+                        if (!uniqueIds.has(p.id)) {
+                            uniqueIds.add(p.id);
+                            allProducts.push(p);
+                        }
+                    });
+                }
+
                 const grid = document.getElementById('productGrid');
                 grid.innerHTML = '';
 
-                data.products.forEach(product => {
+                allProducts.forEach(product => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.innerHTML = `
                         <img src="${product.thumbnail}" alt="${product.title}" style="width:100px; height:100px; object-fit:contain; margin-bottom:8px;">
                         <h3>${product.title}</h3>
-                        <p>₹${Math.round(product.price * 80)}</p>
-                        <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(product.title)}" target="_blank">View Live</a>
+                        <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(product.title)}" target="_blank">🔗 View on Google Shop / Meesho / Flipkart</a>
                     `;
                     grid.appendChild(card);
                 });
@@ -189,9 +211,11 @@
             if (pin === '1717') {
                 document.getElementById('vaultLoginSection').style.display = 'none';
                 document.getElementById('vaultSection').style.display = 'flex';
+                document.getElementById('vaultPinInput').value = ''; // Blank out pin box
                 socket.emit('requestVaultHistory');
             } else {
-                alert('Incorrect Vault PIN! Try 1717');
+                alert('Incorrect PIN! Try 1717');
+                document.getElementById('vaultPinInput').value = '';
             }
         }
 
@@ -226,8 +250,10 @@
                     user: currentUser,
                     text: '',
                     fileType: selectedFileType,
-                    fileData: selectedFile
+                    fileData: selectedFile,
+                    replyTo: currentReplyId
                 });
+                cancelReply();
                 selectedFile = null;
                 selectedFileType = null;
                 event.target.value = '';
@@ -244,10 +270,12 @@
                 user: currentUser,
                 text: text,
                 fileType: selectedFileType,
-                fileData: selectedFile
+                fileData: selectedFile,
+                replyTo: currentReplyId
             });
 
             input.value = '';
+            cancelReply();
             selectedFile = null;
             selectedFileType = null;
         }
@@ -255,6 +283,59 @@
         function handleChatKey(e) {
             if (e.key === 'Enter') sendMessage();
         }
+
+        function setReply(msgId, snippetText) {
+            currentReplyId = msgId;
+            document.getElementById('replyTextSnippet').innerText = `Replying to: ${snippetText}`;
+            document.getElementById('replyPreview').style.display = 'flex';
+        }
+
+        function cancelReply() {
+            currentReplyId = null;
+            document.getElementById('replyPreview').style.display = 'none';
+        }
+
+        function showMessageOptions(msgId, sender, text) {
+            const choice = prompt("Select Action:\n1. Reply\n2. Add Reaction (❤️, 👍, 😂)\n3. Edit Message (Own only)\n4. Delete Message (Own only)");
+            if (choice === "1") {
+                setReply(msgId, text || "Media");
+            } else if (choice === "2") {
+                const reaction = prompt("Enter Emoji Reaction (❤️, 👍, 😂, 🔥):");
+                if (reaction) socket.emit('addReaction', { id: msgId, reaction });
+            } else if (choice === "3" && sender === currentUser) {
+                const newText = prompt("Edit text:", text);
+                if (newText) socket.emit('editMessage', { id: msgId, newText });
+            } else if (choice === "4" && sender === currentUser) {
+                socket.emit('deleteMessage', { id: msgId });
+            }
+        }
+
+        socket.on('messageDeleted', (msgId) => {
+            const el = document.getElementById(msgId);
+            if (el) el.remove();
+        });
+
+        socket.on('messageEdited', (data) => {
+            const el = document.getElementById(data.id);
+            if (el) {
+                const textSpan = el.querySelector('.msg-text');
+                if (textSpan) textSpan.innerText = data.newText + " (edited)";
+            }
+        });
+
+        socket.on('messageReaction', (data) => {
+            const el = document.getElementById(data.id);
+            if (el) {
+                let reactSpan = el.querySelector('.reaction-badge');
+                if (!reactSpan) {
+                    reactSpan = document.createElement('div');
+                    reactSpan.className = 'reaction-badge';
+                    reactSpan.style.cssText = "position:absolute; bottom:-8px; right:8px; background:#202c33; padding:2px 6px; border-radius:10px; font-size:12px;";
+                    el.appendChild(reactSpan);
+                }
+                reactSpan.innerText = data.reaction;
+            }
+        });
 
         async function startCall(type) {
             document.getElementById('callScreen').style.display = 'flex';
@@ -347,18 +428,31 @@
             const targetContainer = document.getElementById(containerId);
             const div = document.createElement('div');
             div.className = `msg ${msg.user === currentUser ? 'sent' : 'received'}`;
+            div.id = msg.id;
             
-            let content = `<b>${msg.user}</b><br>`;
+            div.onclick = () => showMessageOptions(msg.id, msg.user, msg.text);
+
+            let content = '';
+            if (msg.replyTo) {
+                content += `<div class="reply-quote">Replying to message</div>`;
+            }
+            content += `<b>${msg.user}</b><br>`;
             if (msg.text) {
-                content += `<span>${msg.text}</span><br>`;
+                content += `<span class="msg-text">${msg.text}</span><br>`;
             }
             if (msg.fileType === 'image' && msg.fileData) {
                 content += `<img src="${msg.fileData}" alt="Image">`;
             } else if (msg.fileType === 'video' && msg.fileData) {
                 content += `<video controls src="${msg.fileData}"></video>`;
             }
-            content += `<span style="font-size:9px; float:right; color:#8696a0; margin-top:5px; margin-left:10px;">${msg.time}</span>`;
             
+            const ticks = msg.user === currentUser ? '<span style="color: #53bdeb; margin-left:4px;">✓✓</span>' : '';
+            content += `<div style="font-size:9px; float:right; color:#8696a0; margin-top:5px; margin-left:10px;">${msg.time} ${ticks}</div>`;
+            
+            if (msg.reaction) {
+                content += `<div class="reaction-badge" style="position:absolute; bottom:-8px; right:8px; background:#202c33; padding:2px 6px; border-radius:10px; font-size:12px;">${msg.reaction}</div>`;
+            }
+
             div.innerHTML = content;
             targetContainer.appendChild(div);
             targetContainer.scrollTop = targetContainer.scrollHeight;
