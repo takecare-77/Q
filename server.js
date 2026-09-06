@@ -17,21 +17,12 @@ app.get('/', (req, res) => {
 let liveMessages = [];
 let vaultHistory = [];
 
-const VALID_USERS = {
-    "user1": "pass123",
-    "user2": "pass456"
-};
-
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    if (VALID_USERS[username] && VALID_USERS[username] === password) {
-        return res.json({ success: true });
-    }
-    return res.status(400).json({ success: false, message: 'Invalid Credentials' });
-});
-
 io.on('connection', (socket) => {
+    let currentSocketUser = '';
+
     socket.on('joinRoom', (username) => {
+        currentSocketUser = username;
+        socket.join('room_main');
         socket.emit('initialLiveMessages', liveMessages);
     });
 
@@ -48,10 +39,26 @@ io.on('connection', (socket) => {
             fileData: data.fileData || null,
             replyTo: data.replyTo || null,
             reaction: null,
+            status: 'sent', // 'sent' (1 tick) or 'seen' (2 blue ticks)
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         liveMessages.push(msg);
-        io.emit('message', msg);
+        io.to('room_main').emit('message', msg);
+    });
+
+    // Handle typing status
+    socket.on('typing', (data) => {
+        socket.broadcast.to('room_main').emit('displayTyping', data);
+    });
+
+    // Handle message seen status
+    socket.on('markSeen', (username) => {
+        liveMessages.forEach(m => {
+            if (m.user !== username && m.status === 'sent') {
+                m.status = 'seen';
+            }
+        });
+        io.to('room_main').emit('messagesSeen', username);
     });
 
     socket.on('deleteMessage', (data) => {
@@ -59,7 +66,7 @@ io.on('connection', (socket) => {
         if (index !== -1) {
             const deleted = liveMessages.splice(index, 1)[0];
             vaultHistory.push(deleted);
-            io.emit('messageDeleted', data.id);
+            io.to('room_main').emit('messageDeleted', data.id);
         }
     });
 
@@ -67,7 +74,7 @@ io.on('connection', (socket) => {
         const msg = liveMessages.find(m => m.id === data.id);
         if (msg) {
             msg.text = data.newText;
-            io.emit('messageEdited', data);
+            io.to('room_main').emit('messageEdited', data);
         }
     });
 
@@ -75,7 +82,7 @@ io.on('connection', (socket) => {
         const msg = liveMessages.find(m => m.id === data.id);
         if (msg) {
             msg.reaction = data.reaction;
-            io.emit('messageReaction', data);
+            io.to('room_main').emit('messageReaction', data);
         }
     });
 
