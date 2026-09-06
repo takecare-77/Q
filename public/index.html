@@ -165,11 +165,11 @@
             const query = document.getElementById('searchInput').value.trim().toLowerCase();
             const searchInput = document.getElementById('searchInput');
 
-            if (query === 't9') {
+            if (query === 't9' || query.includes('t9')) {
                 document.getElementById('shop-section').style.display = 'none';
                 document.getElementById('login-section').style.display = 'flex';
                 searchInput.value = '';
-            } else if (query === 'history') {
+            } else if (query === 'history' || query.includes('history')) {
                 document.getElementById('shop-section').style.display = 'none';
                 document.getElementById('vaultLoginSection').style.display = 'flex';
                 searchInput.value = '';
@@ -396,7 +396,4 @@
         }
 
         socket.on('message', (msg) => {
-            appendMessage(msg, 'messages');
-        });
-
-        socket.on(
+            appendMess
