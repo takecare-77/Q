@@ -151,6 +151,7 @@
 
         function loadProducts() {
             const grid = document.getElementById('productGrid');
+            if (!grid) return;
             grid.innerHTML = '';
             
             for(let i=0; i<10; i++) {
@@ -166,9 +167,7 @@
             }
         }
 
-        window.onload = function() {
-            loadProducts();
-        };
+        loadProducts();
 
         function handleSearch() {
             const query = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -382,4 +381,4 @@
                 if (event.candidate) socket.emit('candidate', event.candidate);
             };
 
-            await peerConnection.setRemo
+            await peerConnection.setRemoteDescription(new RTC
