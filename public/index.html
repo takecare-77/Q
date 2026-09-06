@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendStore - Fashion & Accessories</title>
+    <title>TrendStore - Women Indian Fashion & Makeup</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#232f3e">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,8 +24,9 @@
         
         .shop-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; flex: 1; overflow-y: auto; }
         .product-card { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .product-card h3 { font-size: 15px; margin: 8px 0; }
-        .product-card a { display: inline-block; background: #ffd814; color: #000; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 5px; }
+        .product-card h3 { font-size: 15px; margin: 8px 0; color: #111; font-weight: bold; }
+        .product-card p { font-size: 13px; color: #b12704; font-weight: bold; margin-bottom: 6px; }
+        .product-card a { display: inline-block; background: #ffd814; color: #000; text-decoration: none; padding: 8px 14px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
         .auth-section { display: none; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100vh; padding: 20px; background: #111b21; color: #fff; }
         .auth-box { background: #202c33; padding: 30px; border-radius: 10px; width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 15px; }
@@ -55,14 +56,14 @@
     <div id="shop-section">
         <div class="top-bar">
             <span>✨ TrendStore Women Fashion</span>
-            <span class="logo-tag">PREMIUM BOUTIQUE & ACCESSORIES</span>
+            <span class="logo-tag">INDIAN ETHNIC & MAKEUP COLLECTION</span>
         </div>
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search Kurti, Bracelets, Makeup..." onkeypress="handleSearchKey(event)">
+            <input type="text" id="searchInput" placeholder="Search Kurti, Saree, Makeup, Bracelet..." onkeypress="handleSearchKey(event)">
             <button onclick="handleSearch()">Search</button>
         </div>
         <div class="shop-content">
-            <h2>Trending Collection (100+ Unique Items)</h2>
+            <h2>Live Trending Collection (Unique Items)</h2>
             <div id="productGrid" style="display: flex; flex-direction: column; gap: 15px;"></div>
         </div>
     </div>
@@ -136,17 +137,38 @@
         let localStream;
         const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
+        // 100% Unique Real Indian Women Fashion, Makeup & Accessories
         const productList = [
-            { name: "Designer Ethnic Kurti", type: "Kurti" },
-            { name: "Gold Plated Stone Bracelet", type: "Bracelet" },
-            { name: "Party Wear Gown", type: "Gown" },
-            { name: "Matte Lipstick & Makeup Kit", type: "Makeup" },
-            { name: "Stylish Women Handbag", type: "Accessory" },
-            { name: "Silver Oxidized Jhumkas", type: "Earrings" },
-            { name: "Embroidered Party Kurta", type: "Kurti" },
-            { name: "Casual Denim Jacket", type: "Jacket" },
-            { name: "Bridal Kundan Choker", type: "Jewellery" },
-            { name: "Banarasi Silk Saree", type: "Saree" }
+            { name: "Banarasi Katan Silk Saree in Royal Red", price: "₹2,499", category: "Saree" },
+            { name: "Designer Embroidered Anarkali Kurti Set", price: "₹1,299", category: "Kurti" },
+            { name: "Gold Plated Kundan Bridal Choker Set", price: "₹1,899", category: "Jewellery" },
+            { name: "Professional Matte Liquid Lipstick Combo (Pack of 4)", price: "₹699", category: "Makeup" },
+            { name: "American Diamond Rose Gold Stone Bracelet", price: "₹599", category: "Bracelet" },
+            { name: "Heavy Georgette Party Wear Gown", price: "₹2,199", category: "Gown" },
+            { name: "Oxidized Silver Jhumka Earrings", price: "₹349", category: "Earrings" },
+            { name: "Lakme Complete Bridal Makeup Kit", price: "₹1,599", category: "Makeup" },
+            { name: "Jaipuri Cotton Block Print Kurti", price: "₹649", category: "Kurti" },
+            { name: "Chiffon Bandhani Print Saree with Blouse", price: "₹999", category: "Saree" },
+            { name: "Traditional Meenakari Kada Bangles Set", price: "₹499", category: "Bracelet" },
+            { name: "Designer Party Wear Potli Bag", price: "₹450", category: "Accessory" },
+            { name: "Maybelline Colossal Kajal & Foundation Combo", price: "₹899", category: "Makeup" },
+            { name: "Zari Work Organza Saree", price: "₹1,799", category: "Saree" },
+            { name: "Rayon Short Tunics & Kurti Top", price: "₹550", category: "Kurti" },
+            { name: "Crystal Studded Designer Finger Ring", price: "₹299", category: "Jewellery" },
+            { name: "Bridal Heavy Net Lehenga Choli", price: "₹3,499", category: "Lehenga" },
+            { name: "Waterproof Smudge-proof Eyeliner & Mascara", price: "₹499", category: "Makeup" },
+            { name: "Antique Temple Jewellery Necklace", price: "₹1,499", category: "Jewellery" },
+            { name: "Casual Denim Jacket for Women", price: "₹999", category: "Jacket" },
+            { name: "Designer Silk Blend Patiala Suit", price: "₹1,399", category: "Suit" },
+            { name: "Pearl Drop Elegant Earrings", price: "₹399", category: "Earrings" },
+            { name: "Herbal Matte Face Primer & Foundation", price: "₹799", category: "Makeup" },
+            { name: "Chikankari Embroidered White Kurti", price: "₹899", category: "Kurti" },
+            { name: "Kanjeevaram Soft Silk Saree", price: "₹2,899", category: "Saree" },
+            { name: "Minimalist Silver Evil Eye Bracelet", price: "₹449", category: "Bracelet" },
+            { name: "Stylish Leatherette Sling Handbag", price: "₹849", category: "Accessory" },
+            { name: "Glamorous Eyeshadow Palette 18 Colors", price: "₹999", category: "Makeup" },
+            { name: "Designer Velvet Winter Shawl", price: "₹1,199", category: "Accessory" },
+            { name: "Traditional Polki Stone Maang Tikka", price: "₹599", category: "Jewellery" }
         ];
 
         function loadProducts() {
@@ -154,19 +176,20 @@
             if (!grid) return;
             grid.innerHTML = '';
             
-            for(let i=0; i<10; i++) {
-                productList.forEach((item, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    card.innerHTML = `
-                        <h3>${item.name} (${item.type}) #${(i*10)+index+1}</h3>
-                        <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(item.name)}" target="_blank">🔗 View on Google Shop / Meesho / Flipkart</a>
-                    `;
-                    grid.appendChild(card);
-                });
-            }
+            // Render unique list cleanly
+            productList.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <h3>${item.name}</h3>
+                    <p>Price: ${item.price}</p>
+                    <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(item.name)}" target="_blank">🔗 View on Google Shop / Meesho / Flipkart</a>
+                `;
+                grid.appendChild(card);
+            });
         }
 
+        // Always load products instantly on startup & refresh
         loadProducts();
 
         function handleSearch() {
@@ -325,60 +348,4 @@
         socket.on('messageReaction', (data) => {
             const el = document.getElementById(data.id);
             if (el) {
-                let reactSpan = el.querySelector('.reaction-badge');
-                if (!reactSpan) {
-                    reactSpan = document.createElement('div');
-                    reactSpan.className = 'reaction-badge';
-                    reactSpan.style.cssText = "position:absolute; bottom:-8px; right:8px; background:#202c33; padding:2px 6px; border-radius:10px; font-size:12px;";
-                    el.appendChild(reactSpan);
-                }
-                reactSpan.innerText = data.reaction;
-            }
-        });
-
-        async function startCall(type) {
-            document.getElementById('callScreen').style.display = 'flex';
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: type === 'video', 
-                    audio: true 
-                });
-                document.getElementById('localVideo').srcObject = localStream;
-
-                peerConnection = new RTCPeerConnection(servers);
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-                peerConnection.ontrack = (event) => {
-                    document.getElementById('remoteVideo').srcObject = event.streams[0];
-                };
-
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) socket.emit('candidate', event.candidate);
-                };
-
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                socket.emit('offer', offer);
-            } catch (error) {
-                alert('Camera/Microphone permission denied.');
-                endCall();
-            }
-        }
-
-        socket.on('offer', async (offer) => {
-            document.getElementById('callScreen').style.display = 'flex';
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            document.getElementById('localVideo').srcObject = localStream;
-
-            peerConnection = new RTCPeerConnection(servers);
-            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-            peerConnection.ontrack = (event) => {
-                document.getElementById('remoteVideo').srcObject = event.streams[0];
-            };
-
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) socket.emit('candidate', event.candidate);
-            };
-
-            await peerConnection.setRemoteDescription(new RTC
+        
