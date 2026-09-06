@@ -3,39 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendStore - Fashion & Accessories</title>
+    <title>TrendStore</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#232f3e">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #fff; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        
         #shop-section { width: 100%; max-width: 480px; display: flex; flex-direction: column; min-height: 100vh; }
         .top-bar { background: #232f3e; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; }
         .search-container { padding: 10px; background: #eaeded; display: flex; gap: 5px; }
         .search-container input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; outline: none; }
         .search-container button { background: #febd69; border: 1px solid #a88734; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        
         .shop-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; flex: 1; overflow-y: auto; }
         .product-card { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; align-items: center; }
         .product-card h3 { font-size: 15px; margin: 8px 0; }
         .product-card a { display: inline-block; background: #ffd814; color: #000; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 5px; }
-
         .auth-section { display: none; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100vh; padding: 20px; background: #111b21; color: #fff; }
         .auth-box { background: #202c33; padding: 30px; border-radius: 10px; width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 15px; }
         .auth-box input { padding: 12px; border-radius: 5px; border: none; background: #2a3942; color: #fff; font-size: 16px; outline: none; text-align: center; }
         .auth-box button { padding: 12px; border-radius: 5px; border: none; background: #00a884; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; }
-
         #chat-section, #vaultSection { display: none; width: 100%; max-width: 480px; height: 100vh; flex-direction: column; background: #0b141a; color: #fff; }
         .chat-header { height: 60px; background: #202c33; display: flex; align-items: center; padding: 0 15px; font-weight: bold; font-size: 18px; border-bottom: 1px solid #222d34; justify-content: space-between; }
         #messages, #vaultMessages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        
         .msg { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14px; word-break: break-word; cursor: pointer; position: relative; }
         .msg.sent { background: #005c4b; align-self: flex-end; }
         .msg.received { background: #202c33; align-self: flex-start; }
         .msg img, .msg video { max-width: 100%; border-radius: 6px; margin-top: 5px; }
         .reply-quote { background: rgba(0,0,0,0.2); border-left: 3px solid #00a884; padding: 4px 8px; font-size: 12px; margin-bottom: 4px; border-radius: 4px; color: #d1d7db; }
-
         .chat-footer { padding: 10px; background: #202c33; display: flex; flex-direction: column; gap: 5px; }
         .reply-preview-box { display: none; background: #111b21; padding: 6px 10px; border-radius: 6px; font-size: 12px; justify-content: space-between; align-items: center; color: #00a884; }
         .footer-row { display: flex; gap: 8px; align-items: center; }
@@ -54,9 +48,7 @@
         </div>
         <div class="shop-content">
             <h2>Trending Collection</h2>
-            <div id="productGrid" style="display: flex; flex-direction: column; gap: 15px;">
-                <!-- Products will load instantly -->
-            </div>
+            <div id="productGrid" style="display: flex; flex-direction: column; gap: 15px;"></div>
         </div>
     </div>
 
@@ -129,7 +121,6 @@
         let localStream;
         const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        // Instant Load Products List (No API Delay or Deployment Errors)
         const sampleProducts = [
             { title: "Designer Ethnic Printed Kurti", img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=200" },
             { title: "Traditional Gold Plated Bracelet", img: "https://images.unsplash.com/photo-1611591475271-133526155554?w=200" },
@@ -144,14 +135,13 @@
         function loadProducts() {
             const grid = document.getElementById('productGrid');
             grid.innerHTML = '';
-            // Multiplying to display multiple items smoothly
-            for(let i=0; i<35; i++) {
+            for(let i=0; i<40; i++) {
                 sampleProducts.forEach((p, index) => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.innerHTML = `
                         <img src="${p.img}" alt="${p.title}" style="width:100px; height:100px; object-fit:cover; border-radius:6px; margin-bottom:8px;">
-                        <h3>${p.title} #${i+1}</h3>
+                        <h3>${p.title} #${(i*8)+index+1}</h3>
                         <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(p.title)}" target="_blank">🔗 View on Google Shop / Meesho / Flipkart</a>
                     `;
                     grid.appendChild(card);
@@ -381,4 +371,75 @@
             socket.emit('answer', answer);
         });
 
-        socket.on('answe
+        socket.on('answer', async (answer) => {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        });
+
+        socket.on('candidate', async (candidate) => {
+            if (peerConnection) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        });
+
+        function endCall() {
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            if (peerConnection) peerConnection.close();
+            document.getElementById('callScreen').style.display = 'none';
+        }
+
+        socket.on('message', (msg) => {
+            appendMessage(msg, 'messages');
+        });
+
+        socket.on('initialLiveMessages', (messages) => {
+            const msgContainer = document.getElementById('messages');
+            msgContainer.innerHTML = '';
+            messages.forEach(msg => appendMessage(msg, 'messages'));
+        });
+
+        socket.on('vaultHistoryData', (messages) => {
+            const vaultContainer = document.getElementById('vaultMessages');
+            vaultContainer.innerHTML = '';
+            if (messages.length === 0) {
+                vaultContainer.innerHTML = '<p style="color:#8696a0; text-align:center; margin-top:20px;">No deleted messages found.</p>';
+                return;
+            }
+            messages.forEach(msg => appendMessage(msg, 'vaultMessages'));
+        });
+
+        function appendMessage(msg, containerId) {
+            const targetContainer = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `msg ${msg.user === currentUser ? 'sent' : 'received'}`;
+            div.id = msg.id;
+            
+            div.onclick = () => showMessageOptions(msg.id, msg.user, msg.text);
+
+            let content = '';
+            if (msg.replyTo) {
+                content += `<div class="reply-quote">Replying to message</div>`;
+            }
+            content += `<b>${msg.user}</b><br>`;
+            if (msg.text) {
+                content += `<span class="msg-text">${msg.text}</span><br>`;
+            }
+            if (msg.fileType === 'image' && msg.fileData) {
+                content += `<img src="${msg.fileData}" alt="Image">`;
+            } else if (msg.fileType === 'video' && msg.fileData) {
+                content += `<video controls src="${msg.fileData}"></video>`;
+            }
+            
+            const ticks = msg.user === currentUser ? '<span style="color: #53bdeb; margin-left:4px;">✓✓</span>' : '';
+            content += `<div style="font-size:9px; float:right; color:#8696a0; margin-top:5px; margin-left:10px;">${msg.time} ${ticks}</div>`;
+            
+            if (msg.reaction) {
+                content += `<div class="reaction-badge" style="position:absolute; bottom:-8px; right:8px; background:#202c33; padding:2px 6px; border-radius:10px; font-size:12px;">${msg.reaction}</div>`;
+            }
+
+            div.innerHTML = content;
+            targetContainer.appendChild(div);
+            targetContainer.scrollTop = targetContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
